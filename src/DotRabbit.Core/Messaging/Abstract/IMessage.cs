@@ -1,0 +1,30 @@
+﻿namespace DotRabbit.Core.Messaging.Abstract;
+
+internal interface IMessage
+{
+    /// <summary>
+    /// Delivery identifier assigned by RabbitMQ for this message on a specific channel.
+    /// Used for Ack/Nack/Reject operations.
+    /// </summary>
+    ulong DeliveryTag { get; }
+
+    /// <summary>
+    /// The name of the exchange from which the message was received.
+    /// </summary>
+    string Exchange { get; }
+
+    /// <summary>
+    /// The routing key used by RabbitMQ to route the message.
+    /// </summary>
+    string RoutingKey { get; }
+
+    /// <summary>
+    /// Raw binary payload of the message.
+    /// </summary>
+    ReadOnlyMemory<byte> Body { get; }
+
+    /// <summary>
+    /// Message metadata headers (AMQP headers table).
+    /// </summary>
+    IReadOnlyDictionary<string, object?> Headers { get; }
+}

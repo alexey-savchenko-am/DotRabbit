@@ -1,0 +1,29 @@
+ - Queues look like
+
+		billing.order.created
+		stock.order.created
+		email.user.confirmed
+
+		[service_name].[event]
+
+- One exchange on event Domain
+
+	await topology.DeclareExchangeAsync("events", ExchangeType.Topic);
+
+
+
+###############################
+
+Let's create a new message consumer on each EVENT
+
+var connection = await connectionFactory.GetConnectionAsync();
+var channel = await connection.CreateChannelAsync(); // dedicated
+
+await channel.BasicQosAsync(0, 100, false);
+
+var consumer = new RmqMessageConsumer(channel);
+
+await channel.BasicConsumeAsync(
+    queue: "orders.created",
+    autoAck: false,
+    consumer: consumer);
