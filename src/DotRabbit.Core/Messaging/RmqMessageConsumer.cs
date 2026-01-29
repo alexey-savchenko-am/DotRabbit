@@ -1,6 +1,7 @@
 ﻿using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Threading.Channels;
 
 namespace DotRabbit.Core.Messaging;
@@ -12,6 +13,8 @@ internal sealed class RmqMessageConsumer
     private readonly MessageWorkerPool _workerPool;
     private readonly ChannelWriter<DeliveryStatus> _deliveryStatusProducer;
     private readonly ILogger _logger;
+    private string? _consumerTag;
+    private int _signaled;
 
     public RmqMessageConsumer(
         ILogger<RmqMessageConsumer> logger,
@@ -61,4 +64,33 @@ internal sealed class RmqMessageConsumer
               cancellationToken);
         }
     }
+
+    public override Task HandleBasicConsumeOkAsync(string consumerTag, CancellationToken cancellationToken = default)
+    {
+        _consumerTag = consumerTag;
+        return base.HandleBasicConsumeOkAsync(consumerTag, cancellationToken);
+    }
+
+    public override Task HandleChannelShutdownAsync(object sender, ShutdownEventArgs reason)
+    {
+        SignalRestart();
+        return Task.CompletedTask;
+    }
+
+    public override Task HandleBasicCancelAsync(string consumerTag, CancellationToken ct = default)
+    {
+        SignalRestart();
+        return Task.CompletedTask;
+    }
+
+    private void SignalRestart()
+    {
+        if (Interlocked.Exchange(ref _signaled, 1) == 1)
+            return;
+
+        _restartWriter.TryWrite(new RestartSignal());
+    }
+
+    public st
+
 }

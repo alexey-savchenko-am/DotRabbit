@@ -13,12 +13,12 @@ internal class RmqEventPerQueueTopologyStrategy
         _topologyManager = topologyManager;
     }
 
-    public async Task<IReadOnlyList<Queue>> ProvisionTopologyAsync(
+    public async Task<IReadOnlyList<QueueDefinition>> ProvisionTopologyAsync(
         Service service, 
         Domain domain, 
         IReadOnlyCollection<Event> events)
     {
-        var result = new List<Queue>();
+        var result = new List<QueueDefinition>();
 
         var exchange = $"{service.Name}.{domain.Name}.topic";
         var dlx = $"{service.Name}.{domain.Name}.dlx";
@@ -43,8 +43,8 @@ internal class RmqEventPerQueueTopologyStrategy
             // dlx is Fanout, so bindingKey is ""
             await _topologyManager.BindQueueAsync(dlq, dlx, "");
 
-            result.Add(Queue.Live(queue));
-            result.Add(Queue.Dead(dlq));
+            result.Add(QueueDefinition.Live(queue));
+            result.Add(QueueDefinition.Dead(dlq));
         }
 
         return result;
