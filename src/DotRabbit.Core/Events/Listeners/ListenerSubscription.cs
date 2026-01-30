@@ -1,7 +1,7 @@
 ﻿using DotRabbit.Core.Events.Entities;
-using DotRabbit.Core.Messaging;
+using DotRabbit.Core.Messaging.Entities;
 using DotRabbit.Core.Settings.Entities;
-namespace DotRabbit.Core.Events;
+namespace DotRabbit.Core.Events.Listeners;
 
 public sealed record ListenerSubscription
     : IAsyncDisposable
@@ -35,7 +35,7 @@ public sealed record ListenerSubscription
 
     public async ValueTask UnsubscribeAsync()
     {
-        foreach(var (_,sub) in ConsumerSubscriptions)
+        foreach (var (_, sub) in ConsumerSubscriptions)
         {
             await sub.UnsubscribeAsync();
         }

@@ -1,4 +1,5 @@
 ﻿using DotRabbit.Core.Messaging.Abstract;
+using DotRabbit.Core.Messaging.Entities;
 using System.Text;
 using System.Threading.Channels;
 
@@ -18,7 +19,7 @@ internal sealed record Message
     private string? _bodyStr;
     private readonly ChannelWriter<DeliveryStatus> _deliveryStatusProducer;
 
-    public string  BodyStr => _bodyStr ??= Encoding.UTF8.GetString(Body.Span);
+    public string BodyStr => _bodyStr ??= Encoding.UTF8.GetString(Body.Span);
 
     private Message(
         ChannelWriter<DeliveryStatus> deliveryStatusProducer,
@@ -59,16 +60,32 @@ internal sealed record Message
         );
     }
 
-    public ValueTask Ack()
+    public ValueTask AckAsync()
     {
         Status = DeliveryStatusCode.Ack;
         return _deliveryStatusProducer.WriteAsync(new DeliveryStatus(Status, DeliveryTag));
     }
 
-    public ValueTask Nack()
+    public ValueTask NackAsync()
     {
         Status = DeliveryStatusCode.Nack;
         return _deliveryStatusProducer.WriteAsync(new DeliveryStatus(Status, DeliveryTag));
+    }
+
+    public string GetRequiredHeader(string headerKey)
+    {
+        if (!Headers.TryGetValue(headerKey, out var header) || header is null)
+            throw new KeyNotFoundException(headerKey);
+
+        return header.ToString() ?? throw new KeyNotFoundException(headerKey);
+    }
+
+    public string? GetHeader(string headerKey)
+    {
+        if (!Headers.ContainsKey(headerKey))
+            return null;
+
+        return Headers[headerKey]?.ToString();
     }
 
     public override string ToString()

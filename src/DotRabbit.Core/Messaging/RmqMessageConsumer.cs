@@ -1,4 +1,5 @@
-﻿using DotRabbit.Core.Settings.Entities;
+﻿using DotRabbit.Core.Messaging.Entities;
+using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -88,9 +89,6 @@ internal sealed class RmqMessageConsumer
         if (Interlocked.Exchange(ref _signaled, 1) == 1)
             return;
 
-        _restartWriter.TryWrite(new RestartSignal());
+     
     }
-
-    public st
-
 }

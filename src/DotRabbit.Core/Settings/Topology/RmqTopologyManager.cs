@@ -1,7 +1,8 @@
 ﻿using DotRabbit.Core.Connection;
+using DotRabbit.Core.Settings.Entities;
 using RabbitMQ.Client;
 
-namespace DotRabbit.Core.Settings;
+namespace DotRabbit.Core.Settings.Topology;
 
 internal sealed class RmqTopologyManager
 {
@@ -13,7 +14,7 @@ internal sealed class RmqTopologyManager
     }
 
     public async Task DeclareExchangeAsync(
-        string name, 
+        string name,
         string type = ExchangeType.Topic,
         CancellationToken ct = default)
     {

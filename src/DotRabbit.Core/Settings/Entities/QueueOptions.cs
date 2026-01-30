@@ -1,4 +1,4 @@
-﻿namespace DotRabbit.Core.Settings;
+﻿namespace DotRabbit.Core.Settings.Entities;
 
 public sealed class QueueOptions
 {

@@ -1,7 +1,7 @@
 ﻿using DotRabbit.Core.Settings.Abstract;
 using DotRabbit.Core.Settings.Entities;
 using RabbitMQ.Client;
-namespace DotRabbit.Core.Settings;
+namespace DotRabbit.Core.Settings.Topology;
 
 internal class RmqEventPerQueueTopologyStrategy
     : ITopologyStrategy
@@ -14,8 +14,8 @@ internal class RmqEventPerQueueTopologyStrategy
     }
 
     public async Task<IReadOnlyList<QueueDefinition>> ProvisionTopologyAsync(
-        Service service, 
-        Domain domain, 
+        Service service,
+        Domain domain,
         IReadOnlyCollection<Event> events)
     {
         var result = new List<QueueDefinition>();

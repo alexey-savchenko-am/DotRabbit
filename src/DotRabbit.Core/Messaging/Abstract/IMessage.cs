@@ -1,6 +1,6 @@
 ﻿namespace DotRabbit.Core.Messaging.Abstract;
 
-internal interface IMessage
+public interface IMessage
 {
     /// <summary>
     /// Delivery identifier assigned by RabbitMQ for this message on a specific channel.
@@ -23,8 +23,18 @@ internal interface IMessage
     /// </summary>
     ReadOnlyMemory<byte> Body { get; }
 
+    string BodyStr { get; }
+
     /// <summary>
     /// Message metadata headers (AMQP headers table).
     /// </summary>
     IReadOnlyDictionary<string, object?> Headers { get; }
+
+    string GetRequiredHeader(string headerKey);
+
+    string? GetHeader(string headerKey);
+
+    ValueTask AckAsync();
+
+    ValueTask NackAsync();
 }

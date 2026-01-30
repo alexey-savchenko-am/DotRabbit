@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using DotRabbit.Core.Messaging.Entities;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using System.Threading.Channels;
 

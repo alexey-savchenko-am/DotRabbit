@@ -3,16 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotRabbit.Core", "src\DotRabbit.Core\DotRabbit.Core.csproj", "{AED199F0-CF05-47C5-B3E8-AF383586D49D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotRabbit.Core", "src\DotRabbit.Core\DotRabbit.Core.csproj", "{AED199F0-CF05-47C5-B3E8-AF383586D49D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{796338B7-308C-4958-9B57-ACDCF0BA89D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotRabbit.Abstractions", "src\DotRabbit.Abstractions\DotRabbit.Abstractions.csproj", "{484874B4-9597-4717-AEE9-1D64FBCEDFCC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotRabbit.Abstractions", "src\DotRabbit.Abstractions\DotRabbit.Abstractions.csproj", "{484874B4-9597-4717-AEE9-1D64FBCEDFCC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{97A57BA8-C2A3-4261-88BC-D5BA8A483C74}"
 	ProjectSection(SolutionItems) = preProject
 		ideas.txt = ideas.txt
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotRabbit.UnitTests", "tests\DotRabbit.UnitTests\DotRabbit.UnitTests.csproj", "{32A2146C-9CB0-4A3C-A552-0207308B78F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A2D3A09F-74E0-4BA3-B705-5DEE3A5015E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,9 +32,18 @@ Global
 		{484874B4-9597-4717-AEE9-1D64FBCEDFCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{484874B4-9597-4717-AEE9-1D64FBCEDFCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{484874B4-9597-4717-AEE9-1D64FBCEDFCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32A2146C-9CB0-4A3C-A552-0207308B78F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32A2146C-9CB0-4A3C-A552-0207308B78F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32A2146C-9CB0-4A3C-A552-0207308B78F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32A2146C-9CB0-4A3C-A552-0207308B78F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AED199F0-CF05-47C5-B3E8-AF383586D49D} = {A2D3A09F-74E0-4BA3-B705-5DEE3A5015E6}
+		{484874B4-9597-4717-AEE9-1D64FBCEDFCC} = {A2D3A09F-74E0-4BA3-B705-5DEE3A5015E6}
+		{32A2146C-9CB0-4A3C-A552-0207308B78F7} = {796338B7-308C-4958-9B57-ACDCF0BA89D1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D604693B-00AB-47B5-A434-7A3A8A019CFB}

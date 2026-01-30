@@ -61,6 +61,7 @@ internal sealed class MessageWorkerPool
         for (int workerId = 0; workerId < workerCount; workerId++)
         {
             var task = Task.Run(() => WorkerLoop(workerId));
+
             task.ContinueWith(async t =>
             {
                 _logger.LogCritical(t.Exception, "Worker {WorkerId} crashed.", workerId);

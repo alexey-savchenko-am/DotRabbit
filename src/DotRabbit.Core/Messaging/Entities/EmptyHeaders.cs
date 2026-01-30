@@ -1,4 +1,4 @@
-﻿namespace DotRabbit.Core.Messaging;
+﻿namespace DotRabbit.Core.Messaging.Entities;
 
 internal sealed class EmptyHeaders : IReadOnlyDictionary<string, object?>
 {

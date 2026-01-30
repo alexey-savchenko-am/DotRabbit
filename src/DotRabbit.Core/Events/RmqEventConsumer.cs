@@ -1,7 +1,9 @@
 ﻿using DotRabbit.Abstractions;
 using DotRabbit.Core.Events.Abstract;
 using DotRabbit.Core.Events.Entities;
+using DotRabbit.Core.Events.Listeners;
 using DotRabbit.Core.Messaging;
+using DotRabbit.Core.Messaging.Entities;
 using DotRabbit.Core.Settings.Abstract;
 using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.Logging;

@@ -1,7 +1,7 @@
 ﻿using DotRabbit.Core.Settings.Entities;
 using RabbitMQ.Client;
 
-namespace DotRabbit.Core.Messaging;
+namespace DotRabbit.Core.Messaging.Entities;
 
 public sealed class ConsumerSubscription
     : IAsyncDisposable
@@ -29,7 +29,7 @@ public sealed class ConsumerSubscription
         try
         {
             if (Channel.IsOpen)
-                await Channel.BasicCancelAsync(_tag);
+                await Channel.BasicCancelAsync(Tag);
         }
         catch { /* shutdown race */ }
 
