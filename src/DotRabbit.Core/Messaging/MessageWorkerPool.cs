@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using DotRabbit.Core.Messaging.Abstract;
+using Microsoft.Extensions.Logging;
 using System.Threading.Channels;
 
 namespace DotRabbit.Core.Messaging;
@@ -13,13 +14,16 @@ internal sealed class MessageWorkerPool
     private readonly List<Task> _workersTaskList = [];
     private readonly CancellationTokenSource _cts = new();
     private readonly ILogger _logger;
+    private readonly IMessageRetryPolicy _messageRetryPolicy;
 
     public MessageWorkerPool(
-        ILogger<MessageWorkerPool> logger, 
+        ILogger<MessageWorkerPool> logger,
+        IMessageRetryPolicy messageRetryPolicy,
         int? workerCount, 
         ushort? bufferSize)
     {
         _logger = logger;
+        _messageRetryPolicy = messageRetryPolicy;
         WorkerCount = workerCount ?? Environment.ProcessorCount;
         BufferSize = bufferSize ?? (ushort)(WorkerCount * 4);
 
@@ -60,22 +64,32 @@ internal sealed class MessageWorkerPool
 
         for (int workerId = 0; workerId < workerCount; workerId++)
         {
-            var task = Task.Run(() => WorkerLoop(workerId));
-
-            task.ContinueWith(async t =>
-            {
-                _logger.LogCritical(t.Exception, "Worker {WorkerId} crashed.", workerId);
-
-                if (!_cts.IsCancellationRequested)
-                {
-                    // trying to restart the Worker if it's failed to run 
-                    await Task.Delay(1_000);
-                    await WorkerLoop(workerId);
-                }
-                    
-            }, TaskContinuationOptions.OnlyOnFaulted);
-
+            var task = Task.Run(() => WorkerSupervisor(workerId));
             _workersTaskList.Add(task);
+        }
+    }
+
+    private async Task WorkerSupervisor(int workerId)
+    {
+        var delay = TimeSpan.FromSeconds(1);
+        var maxDelay = TimeSpan.FromMinutes(1);
+
+        while (!_cts.IsCancellationRequested)
+        {
+            try
+            {
+                await WorkerLoop(workerId);
+                delay = TimeSpan.FromSeconds(1);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Worker {WorkerId} crashed. Restarting...", workerId);
+                await Task.Delay(delay, _cts.Token);
+
+                delay = TimeSpan.FromSeconds(
+                    Math.Min(delay.TotalSeconds * 2, maxDelay.TotalSeconds)
+                );
+            }
         }
     }
 
@@ -91,11 +105,13 @@ internal sealed class MessageWorkerPool
                 {
                     _logger.LogDebug("Worker {WorkerId} handling message {Tag}", workerId, msg.DeliveryTag);
 
+                    await msg.AckAsync().ConfigureAwait(false);
                     _logger.LogDebug("Worker {WorkerId} ACK message {Tag}", workerId, msg.DeliveryTag);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Worker {WorkerId} failed message {Tag}", workerId, msg.DeliveryTag);
+                    await _messageRetryPolicy.RetryAsync(msg).ConfigureAwait(false);
                 }
             }
         }

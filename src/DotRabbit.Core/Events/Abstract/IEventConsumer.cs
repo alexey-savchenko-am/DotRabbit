@@ -8,6 +8,6 @@ public interface IEventConsumer
 {
     Task<ListenerSubscription> SubscribeAsync(
         Listener listener,
-        IReadOnlyCollection<Event> events,
+        IReadOnlyCollection<EventDefinition> events,
         CancellationToken ct = default);
 }

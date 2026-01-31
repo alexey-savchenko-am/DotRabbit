@@ -8,12 +8,18 @@ namespace DotRabbit.Core.Messaging;
 internal sealed record Message
     : IMessage
 {
+    public MessageType Type { get; }
     public DeliveryStatusCode Status { get; private set; }
     public ulong DeliveryTag { get; }
     public string Exchange { get; }
     public string RoutingKey { get; }
     public ReadOnlyMemory<byte> Body { get; }
     public IReadOnlyDictionary<string, object?> Headers { get; }
+
+    public int RetryCount =>
+        Headers.TryGetValue(MessageHeaders.RetryCount, out var v)
+            ? (int)(v ?? 0)
+            : 0;
 
     //Lazy body content 
     private string? _bodyStr;
@@ -22,6 +28,7 @@ internal sealed record Message
     public string BodyStr => _bodyStr ??= Encoding.UTF8.GetString(Body.Span);
 
     private Message(
+        MessageType type,
         ChannelWriter<DeliveryStatus> deliveryStatusProducer,
         ulong deliveryTag,
         string exchange,
@@ -30,6 +37,7 @@ internal sealed record Message
         IReadOnlyDictionary<string, object?> headers)
     {
         Status = DeliveryStatusCode.Delivered;
+        Type = type;
         _deliveryStatusProducer = deliveryStatusProducer;
         DeliveryTag = deliveryTag;
         Exchange = exchange;
@@ -38,7 +46,7 @@ internal sealed record Message
         Headers = headers;
     }
 
-    public static Message Create(
+    public static Message CreateIncoming(
         ChannelWriter<DeliveryStatus> deliveryStatusProducer,
         ulong deliveryTag,
         string exchange,
@@ -51,6 +59,7 @@ internal sealed record Message
         ArgumentNullException.ThrowIfNull(routingKey);
 
         return new Message(
+            MessageType.Incoming,
             deliveryStatusProducer,
             deliveryTag,
             exchange,
@@ -59,6 +68,28 @@ internal sealed record Message
             headers ?? EmptyHeaders.Instance
         );
     }
+
+    public static Message CreateOutgoing(
+        string exchange,
+        string routingKey,
+        ReadOnlyMemory<byte> body,
+        IReadOnlyDictionary<string, object?>? headers = null)
+    {
+        ArgumentNullException.ThrowIfNull(exchange);
+
+        ArgumentNullException.ThrowIfNull(routingKey);
+
+        return new Message(
+            MessageType.Outgoing,
+            null!,
+            0,
+            exchange,
+            routingKey,
+            body,
+            headers ?? EmptyHeaders.Instance
+        );
+    }
+
 
     public ValueTask AckAsync()
     {
@@ -91,5 +122,11 @@ internal sealed record Message
     public override string ToString()
     {
         return $"{Exchange}:{RoutingKey}#{DeliveryTag}";
+    }
+
+    internal enum MessageType
+    {
+        Incoming = 0,
+        Outgoing = 1
     }
 }

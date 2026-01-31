@@ -6,7 +6,7 @@ public interface IEventContainer<out TEvent>
     where TEvent : IEvent
 {
     string Id { get; }
-    Domain Domain { get; }
+    DomainDefinition Domain { get; }
     Type EventType { get; }
     TEvent Event { get; }
     string? Error { get; }

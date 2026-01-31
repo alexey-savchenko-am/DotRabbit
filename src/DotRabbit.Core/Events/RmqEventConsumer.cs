@@ -39,14 +39,14 @@ internal sealed class RmqEventConsumer
 
     public async Task<ListenerSubscription> SubscribeAsync(
         Listener listener,
-        IReadOnlyCollection<Event> events,
+        IReadOnlyCollection<EventDefinition> events,
         CancellationToken ct = default)
     {
         if (_subscriptions.ContainsKey(listener))
             throw new InvalidOperationException($"Listener {listener.Id} already subscribed");
 
         var queues = await _topologyStrategy
-            .ProvisionTopologyAsync(new Service(""), listener.Domain, events)
+            .ProvisionTopologyAsync(listener.Domain, events)
             .ConfigureAwait(false);
        
         var connection = await _connectionFactory
@@ -55,7 +55,7 @@ internal sealed class RmqEventConsumer
 
         // IConnection is a thread safe, so don't worry about using it like shown below :)
         var subscriptionTasks = queues
-            .Where(q => !q.IsDead)
+            .Where(q => q.IsLiveDefinition)
             .Select(q => ConsumeQueueAsync(connection, listener.Domain, q, ct));
 
         var subscriptions = await Task.WhenAll(subscriptionTasks).ConfigureAwait(false);
@@ -74,7 +74,7 @@ internal sealed class RmqEventConsumer
 
     private async Task<ConsumerSubscription> ConsumeQueueAsync(
         IConnection connection,
-        Domain domain,
+        DomainDefinition domain,
         QueueDefinition queue,
         CancellationToken ct)
     {

@@ -5,7 +5,7 @@ namespace DotRabbit.Core.Events.Entities;
 
 public sealed record EventContainerData(
     string Id,
-    Domain Domain,
+    DomainDefinition Domain,
     string? Error,
     IMessage? Message
 );

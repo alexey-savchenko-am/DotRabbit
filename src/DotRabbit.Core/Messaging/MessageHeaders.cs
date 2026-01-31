@@ -6,6 +6,6 @@ internal static class MessageHeaders
     public const string Domain = "domain";
     public const string EventName = "event-name";
     public const string EventType = "event-type";
-    public const string PublishDateTime = "event-date";
-    public const string EventErrorMessage = "event-error";
+    public const string PublishDateTime = "x-event-date";
+    public const string RetryCount = "x-retry-count";
 }

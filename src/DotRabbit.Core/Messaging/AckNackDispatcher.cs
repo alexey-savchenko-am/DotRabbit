@@ -37,7 +37,7 @@ internal sealed class AckNackDispatcher
                         await _channel.BasicAckAsync(s.Tag, false);
                         break;
                     case DeliveryStatusCode.Nack:
-                        await _channel.BasicNackAsync(s.Tag, false, false);
+                        await _channel.BasicNackAsync(s.Tag, false, requeue: false);
                         break;
                 }
 

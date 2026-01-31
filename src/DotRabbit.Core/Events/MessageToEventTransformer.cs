@@ -36,7 +36,7 @@ internal sealed class MessageToEventTransformer : IMessageToEventTransformer
 
         var @event = _eventSerializer.Deserialize(message.BodyStr, eventType);
 
-        var data = new EventContainerData(id, new Domain(domain), eventError, message);
+        var data = new EventContainerData(id, new DomainDefinition(domain), eventError, message);
 
         var container = _eventContainerFactory.Create(data, @event);
 

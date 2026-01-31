@@ -2,9 +2,11 @@
 
 public record QueueDefinition
 {
-    public static QueueDefinition Live(string name) => Create(name, "Live");  
-    public static QueueDefinition Dead(string name) => Create(name, "Dead");
-    public bool IsDead => Name.Equals("dead", StringComparison.OrdinalIgnoreCase);
+    public static QueueDefinition DefineLive(string name) => Create(name, "live");  
+    public static QueueDefinition DefineRetry(string name) => Create(name, "retry");  
+    public static QueueDefinition DefineDead(string name) => Create(name, "dead");
+    public bool IsLiveDefinition => Name.Equals("live", StringComparison.OrdinalIgnoreCase);
+
     public string Name { get; }
     public string Type { get; }
 
@@ -16,7 +18,7 @@ public record QueueDefinition
 
     public static QueueDefinition Create(string name, string type)
     {
-        return new QueueDefinition(name.FromPascalCase(), type.ToLowerInvariant());
+        return new QueueDefinition(name, type.ToLowerInvariant());
     }
 }
 

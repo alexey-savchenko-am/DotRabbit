@@ -30,6 +30,11 @@ public interface IMessage
     /// </summary>
     IReadOnlyDictionary<string, object?> Headers { get; }
 
+    /// <summary>
+    /// The number of times the message was resent
+    /// </summary>
+    int RetryCount {  get; }
+
     string GetRequiredHeader(string headerKey);
 
     string? GetHeader(string headerKey);

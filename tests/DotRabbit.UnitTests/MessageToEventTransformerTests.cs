@@ -31,7 +31,7 @@ public class MessageToEventTransformerTests
             { MessageHeaders.Domain, "users"},
         };
 
-        var msg = Message.Create(
+        var msg = Message.CreateIncoming(
            deliveryStatusProducer: null,
            deliveryTag: 1,
            exchange: "users",

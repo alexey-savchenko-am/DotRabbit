@@ -1,13 +1,11 @@
 ﻿namespace DotRabbit.Core.Settings.Entities;
 
-public record Service
+public record DomainDefinition
 {
     public string Name { get; }
 
-    public Service(string name)
+    public DomainDefinition(string name)
     {
         Name = name.ToDottedNotation();
     }
 }
-
-

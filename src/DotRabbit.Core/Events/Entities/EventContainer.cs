@@ -8,7 +8,7 @@ public class EventContainer<TEvent> : IEventContainer<TEvent>
     where TEvent : class, IEvent
 {
     public string Id { get; }
-    public Domain Domain { get; }
+    public DomainDefinition Domain { get; }
     public Type EventType => typeof(TEvent);
     public TEvent Event { get; }
     public string? Error { get; }

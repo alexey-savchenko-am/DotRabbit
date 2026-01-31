@@ -10,7 +10,7 @@ namespace DotRabbit.Core.Messaging;
 internal sealed class RmqMessageConsumer
     : AsyncDefaultBasicConsumer
 {
-    private readonly Domain _domain;
+    private readonly DomainDefinition _domain;
     private readonly MessageWorkerPool _workerPool;
     private readonly ChannelWriter<DeliveryStatus> _deliveryStatusProducer;
     private readonly ILogger _logger;
@@ -19,7 +19,7 @@ internal sealed class RmqMessageConsumer
 
     public RmqMessageConsumer(
         ILogger<RmqMessageConsumer> logger,
-        Domain domain,
+        DomainDefinition domain,
         MessageWorkerPool workerPool,
         ChannelWriter<DeliveryStatus> deliveryStatusProducer,
         IChannel channel) 
@@ -46,7 +46,7 @@ internal sealed class RmqMessageConsumer
             var headers = properties.Headers?
                 .ToDictionary(k => k.Key, v => v.Value);
 
-            var msg = Message.Create(
+            var msg = Message.CreateIncoming(
                 _deliveryStatusProducer, 
                 deliveryTag, 
                 exchange, 
