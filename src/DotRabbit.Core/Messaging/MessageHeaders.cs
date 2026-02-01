@@ -3,7 +3,7 @@
 internal static class MessageHeaders
 {
     public const string EventId = "event-id";
-    public const string Domain = "domain";
+    public const string Domain = "event-domain";
     public const string EventName = "event-name";
     public const string EventType = "event-type";
     public const string PublishDateTime = "x-event-date";

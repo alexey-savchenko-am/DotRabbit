@@ -1,7 +1,7 @@
-﻿using DotRabbit.Core.Events.Abstract;
-using DotRabbit.Core.Events.Entities;
+﻿using DotRabbit.Core.Eventing.Abstract;
+using DotRabbit.Core.Eventing.Entities;
 
-namespace DotRabbit.Core.Events;
+namespace DotRabbit.Core.Eventing;
 
 internal sealed class EventContainerFactory
     : IEventContainerFactory

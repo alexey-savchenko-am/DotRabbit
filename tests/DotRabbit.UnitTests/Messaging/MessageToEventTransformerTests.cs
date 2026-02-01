@@ -1,41 +1,39 @@
 ﻿using AutoFixture;
 using DotRabbit.Core.Messaging;
+using DotRabbit.Core.Settings.Entities;
+using DotRabbit.Core.Settings.Topology;
 using FluentAssertions;
-using RabbitMQ.Client;
 using System.Text;
 using Xunit;
 
-namespace DotRabbit.UnitTests;
+namespace DotRabbit.UnitTests.Messaging;
 
 public class MessageToEventTransformerTests
     : TestSeed
 {
-    public MessageToEventTransformerTests()
-    {
-       
-    }
-
     [Fact]
     public void Transform_WhenMessageProvided_ReturnsCorrectEventContainer()
     {
         // ARRANGE
-        var fixture = new Fixture();
-        var expectedEvent = fixture.Create<UserCreatedTestEvent>();
+        var expectedEvent = _fixture.Create<UserCreatedTestEvent>();
         var eventJson = _eventSerializer.Serialize(expectedEvent);
-        
+
+        var eventId = _fixture.Create<string>();
+        var domain = new DomainDefinition("users");
+
         var headers = new Dictionary<string, object>
         {
-            { MessageHeaders.EventId, "123"},
+            { MessageHeaders.EventId, eventId},
             { MessageHeaders.EventName, nameof(UserCreatedTestEvent)},
             { MessageHeaders.EventType, typeof(UserCreatedTestEvent).AssemblyQualifiedName!},
-            { MessageHeaders.Domain, "users"},
+            { MessageHeaders.Domain, domain.Name},
         };
 
         var msg = Message.CreateIncoming(
-           deliveryStatusProducer: null,
-           deliveryTag: 1,
-           exchange: "users",
-           routingKey: "tst",
+           deliveryStatusProducer: null!,
+           deliveryTag: _fixture.Create<ulong>(),
+           exchange: RmqTopologyResolver.ResolveExchange(_serviceInfo.GetInfo(), domain),
+           routingKey: RmqTopologyResolver.ResolveRoutingKey<UserCreatedTestEvent>(),
            body: Encoding.UTF8.GetBytes(eventJson),
            headers: headers!);
 
@@ -46,8 +44,7 @@ public class MessageToEventTransformerTests
         container.Should().NotBeNull();
         container.Event.Should().BeOfType<UserCreatedTestEvent>();
         container.Event.Should().BeEquivalentTo(expectedEvent);
-        container.Domain.Name.Should().Be("users");
-        container.Id.Should().Be("123");
+        container.Domain.Should().Be(domain);
+        container.Id.Should().Be(eventId);
     }
-
 }

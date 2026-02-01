@@ -1,9 +1,9 @@
-﻿using DotRabbit.Core.Events.Abstract;
-using DotRabbit.Core.Events.Entities;
+﻿using DotRabbit.Core.Eventing.Abstract;
+using DotRabbit.Core.Eventing.Entities;
 using System.ComponentModel;
 using System.Linq.Expressions;
 
-namespace DotRabbit.Core.Events;
+namespace DotRabbit.Core.Eventing;
 
 internal static class EventContainerFactoryBuilder
 {

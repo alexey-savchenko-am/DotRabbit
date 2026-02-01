@@ -1,11 +1,11 @@
 ﻿using DotRabbit.Core.Settings.Entities;
 
-namespace DotRabbit.Core.Events.Entities;
+namespace DotRabbit.Core.Eventing.Entities;
 
 public record Listener
 {
     public Guid Id { get; }
-    public DomainDefinition Domain{ get; }
+    public DomainDefinition Domain { get; }
 
     public Listener(Guid id, DomainDefinition domain)
     {

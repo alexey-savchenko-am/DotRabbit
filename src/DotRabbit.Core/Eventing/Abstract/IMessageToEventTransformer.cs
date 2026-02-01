@@ -1,6 +1,6 @@
 ﻿using DotRabbit.Core.Messaging.Abstract;
 
-namespace DotRabbit.Core.Events.Abstract;
+namespace DotRabbit.Core.Eventing.Abstract;
 
 public interface IMessageToEventTransformer
 {

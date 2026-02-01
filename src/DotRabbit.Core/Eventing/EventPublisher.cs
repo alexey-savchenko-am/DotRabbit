@@ -1,4 +1,4 @@
-﻿using DotRabbit.Core.Events.Abstract;
+﻿using DotRabbit.Core.Eventing.Abstract;
 using DotRabbit.Core.Messaging;
 using DotRabbit.Core.Messaging.Abstract;
 using DotRabbit.Core.Settings.Abstract;
@@ -7,7 +7,7 @@ using DotRabbit.Core.Settings.Topology;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
-namespace DotRabbit.Core.Events;
+namespace DotRabbit.Core.Eventing;
 
 internal sealed class EventPublisher
     : IEventPublisher

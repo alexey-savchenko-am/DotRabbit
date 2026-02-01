@@ -1,4 +1,4 @@
-﻿using DotRabbit.Core.Events.Abstract;
+﻿using DotRabbit.Core.Eventing.Abstract;
 using DotRabbit.Core.Settings.Abstract;
 using System.Text.Json;
 

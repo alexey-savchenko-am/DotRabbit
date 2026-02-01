@@ -17,7 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Events\Processors\" />
+		<Folder Include="Eventing\Processors\" />
 	</ItemGroup>
 
 	<ItemGroup>

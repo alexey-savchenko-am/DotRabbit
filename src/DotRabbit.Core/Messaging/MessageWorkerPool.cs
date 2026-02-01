@@ -1,4 +1,5 @@
-﻿using DotRabbit.Core.Messaging.Abstract;
+﻿using DotRabbit.Core.Eventing.Abstract;
+using DotRabbit.Core.Messaging.Abstract;
 using Microsoft.Extensions.Logging;
 using System.Threading.Channels;
 
@@ -10,29 +11,35 @@ internal sealed class MessageWorkerPool
     public int WorkerCount { get; }
     public ushort BufferSize { get; }
 
-    private readonly Channel<Message> _workersQueue;
+    private readonly Channel<IMessage> _workersQueue;
     private readonly List<Task> _workersTaskList = [];
     private readonly CancellationTokenSource _cts = new();
     private readonly ILogger _logger;
+    private readonly IMessageToEventTransformer _messageToEventTransformer;
+    private readonly IEventProcessorInvoker _eventProcessorInvoker;
     private readonly IMessageRetryPolicy _messageRetryPolicy;
 
     public MessageWorkerPool(
         ILogger<MessageWorkerPool> logger,
+        IMessageToEventTransformer messageToEventTransformer,
+        IEventProcessorInvoker eventProcessorInvoker,
         IMessageRetryPolicy messageRetryPolicy,
         int? workerCount, 
         ushort? bufferSize)
     {
         _logger = logger;
+        _messageToEventTransformer = messageToEventTransformer;
+        _eventProcessorInvoker = eventProcessorInvoker;
         _messageRetryPolicy = messageRetryPolicy;
         WorkerCount = workerCount ?? Environment.ProcessorCount;
         BufferSize = bufferSize ?? (ushort)(WorkerCount * 4);
 
-        _workersQueue = Channel.CreateBounded<Message>(BufferSize);
+        _workersQueue = Channel.CreateBounded<IMessage>(BufferSize);
 
         StartWorkers(WorkerCount);
     }
 
-    public ValueTask EnqueueAsync(Message msg)
+    public ValueTask EnqueueAsync(IMessage msg)
     {
         if(!_workersQueue.Writer.TryWrite(msg))
         {
@@ -103,9 +110,14 @@ internal sealed class MessageWorkerPool
             {
                 try
                 {
-                    _logger.LogDebug("Worker {WorkerId} handling message {Tag}", workerId, msg.DeliveryTag);
+                    _logger.LogDebug("Worker {WorkerId} is handling message {Tag}", workerId, msg.DeliveryTag);
 
+                    var @event = _messageToEventTransformer.Transform(msg);
+
+                    await _eventProcessorInvoker.InvokeAsync(@event).ConfigureAwait(false);
+                    
                     await msg.AckAsync().ConfigureAwait(false);
+
                     _logger.LogDebug("Worker {WorkerId} ACK message {Tag}", workerId, msg.DeliveryTag);
                 }
                 catch (Exception ex)

@@ -1,7 +1,7 @@
-﻿using DotRabbit.Core.Events.Entities;
+﻿using DotRabbit.Core.Eventing.Entities;
 using DotRabbit.Core.Messaging.Entities;
 using DotRabbit.Core.Settings.Entities;
-namespace DotRabbit.Core.Events.Listeners;
+namespace DotRabbit.Core.Eventing.Listeners;
 
 public sealed record ListenerSubscription
     : IAsyncDisposable

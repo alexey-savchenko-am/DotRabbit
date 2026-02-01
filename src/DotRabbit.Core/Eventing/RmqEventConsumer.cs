@@ -1,7 +1,7 @@
 ﻿using DotRabbit.Abstractions;
-using DotRabbit.Core.Events.Abstract;
-using DotRabbit.Core.Events.Entities;
-using DotRabbit.Core.Events.Listeners;
+using DotRabbit.Core.Eventing.Abstract;
+using DotRabbit.Core.Eventing.Entities;
+using DotRabbit.Core.Eventing.Listeners;
 using DotRabbit.Core.Messaging;
 using DotRabbit.Core.Messaging.Entities;
 using DotRabbit.Core.Settings.Abstract;
@@ -11,7 +11,7 @@ using RabbitMQ.Client;
 using System.Collections.Concurrent;
 using System.Threading.Channels;
 
-namespace DotRabbit.Core.Events;
+namespace DotRabbit.Core.Eventing;
 
 internal sealed class RmqEventConsumer
     : IEventConsumer
@@ -48,7 +48,7 @@ internal sealed class RmqEventConsumer
         var queues = await _topologyStrategy
             .ProvisionTopologyAsync(listener.Domain, events)
             .ConfigureAwait(false);
-       
+
         var connection = await _connectionFactory
             .GetConnectionAsync(ct)
             .ConfigureAwait(false);
@@ -61,8 +61,8 @@ internal sealed class RmqEventConsumer
         var subscriptions = await Task.WhenAll(subscriptionTasks).ConfigureAwait(false);
 
         var listenerSubscription = new ListenerSubscription(
-            listener, 
-            subscriptions: subscriptions.ToDictionary(k => k.Queue), 
+            listener,
+            subscriptions: subscriptions.ToDictionary(k => k.Queue),
             onUnsubscribe: () => _subscriptions.TryRemove(listener, out _));
 
         if (!_subscriptions.TryAdd(listener, listenerSubscription))
@@ -85,7 +85,7 @@ internal sealed class RmqEventConsumer
 
         await channel.BasicQosAsync(
             prefetchSize: 0,
-            prefetchCount: (ushort)_workerPool.BufferSize,
+            prefetchCount: _workerPool.BufferSize,
             global: false,
             ct).ConfigureAwait(false);
 
@@ -131,9 +131,9 @@ internal sealed class RmqEventConsumer
                 .ConfigureAwait(false);
 
             var subscription = await ConsumeQueueAsync(
-                connection, 
-                listener.Domain, 
-                queue, 
+                connection,
+                listener.Domain,
+                queue,
                 CancellationToken.None).ConfigureAwait(false);
 
             // we need to replace DEAD subscription with a fresh one

@@ -1,8 +1,8 @@
-﻿using DotRabbit.Core.Events.Entities;
-using DotRabbit.Core.Events.Listeners;
+﻿using DotRabbit.Core.Eventing.Entities;
+using DotRabbit.Core.Eventing.Listeners;
 using DotRabbit.Core.Settings.Entities;
 
-namespace DotRabbit.Core.Events.Abstract;
+namespace DotRabbit.Core.Eventing.Abstract;
 
 public interface IEventConsumer
 {

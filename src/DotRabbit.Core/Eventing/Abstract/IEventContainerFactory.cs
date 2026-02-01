@@ -1,6 +1,6 @@
-﻿using DotRabbit.Core.Events.Entities;
+﻿using DotRabbit.Core.Eventing.Entities;
 
-namespace DotRabbit.Core.Events.Abstract;
+namespace DotRabbit.Core.Eventing.Abstract;
 
 public interface IEventContainerFactory
 {
