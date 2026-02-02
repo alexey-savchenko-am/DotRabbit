@@ -16,6 +16,7 @@ internal sealed class RmqMessageConsumer
     private readonly ILogger _logger;
     private string? _consumerTag;
     private int _signaled;
+    public event Action? Faulted;
 
     public RmqMessageConsumer(
         ILogger<RmqMessageConsumer> logger,
@@ -74,21 +75,22 @@ internal sealed class RmqMessageConsumer
 
     public override Task HandleChannelShutdownAsync(object sender, ShutdownEventArgs reason)
     {
-        SignalRestart();
+        SignalFault();
         return Task.CompletedTask;
     }
 
     public override Task HandleBasicCancelAsync(string consumerTag, CancellationToken ct = default)
     {
-        SignalRestart();
+        SignalFault();
         return Task.CompletedTask;
     }
 
-    private void SignalRestart()
+    private void SignalFault()
     {
         if (Interlocked.Exchange(ref _signaled, 1) == 1)
             return;
 
-     
+        Faulted?.Invoke();
     }
+
 }

@@ -2,12 +2,12 @@
 
 namespace DotRabbit.Core.Eventing.Entities;
 
-public record Listener
+public record DomainEventGroupSubscriberDefinition
 {
     public Guid Id { get; }
     public DomainDefinition Domain { get; }
 
-    public Listener(Guid id, DomainDefinition domain)
+    public DomainEventGroupSubscriberDefinition(Guid id, DomainDefinition domain)
     {
         Id = id;
         Domain = domain;

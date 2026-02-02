@@ -10,6 +10,9 @@ public sealed class ConsumerSubscription
     public QueueDefinition Queue { get; }
     public IChannel Channel { get; }
     public string Tag { get; }
+    public bool IsFaulted { get; private set; }
+
+    public bool IsHealthy => Channel.IsOpen && !IsFaulted;
 
     public ConsumerSubscription(
         QueueDefinition queue,
@@ -20,6 +23,8 @@ public sealed class ConsumerSubscription
         Channel = channel;
         Tag = tag;
     }
+
+    public void MakeFaulted() => IsFaulted = true;  
 
     public async ValueTask UnsubscribeAsync()
     {

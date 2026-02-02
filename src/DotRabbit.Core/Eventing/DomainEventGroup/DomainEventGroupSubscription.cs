@@ -1,24 +1,39 @@
 ﻿using DotRabbit.Core.Eventing.Entities;
 using DotRabbit.Core.Messaging.Entities;
 using DotRabbit.Core.Settings.Entities;
-namespace DotRabbit.Core.Eventing.Listeners;
 
-public sealed record ListenerSubscription
+namespace DotRabbit.Core.Eventing.DomainEventGroup;
+
+public sealed record DomainEventGroupSubscription
     : IAsyncDisposable
 {
     private readonly Action _onUnsubscribe;
-    private Listener Listener { get; }
+    private DomainEventGroupSubscriberDefinition SubscriberDefinition { get; }
     private Dictionary<QueueDefinition, ConsumerSubscription> ConsumerSubscriptions { get; }
     private readonly object _lock = new();
 
-    public ListenerSubscription(
-        Listener listener,
+    public DomainEventGroupSubscription(
+        DomainEventGroupSubscriberDefinition subscriberDefinition,
         Dictionary<QueueDefinition, ConsumerSubscription> subscriptions,
         Action onUnsubscribe)
     {
-        Listener = listener ?? throw new ArgumentNullException(nameof(listener));
+        SubscriberDefinition = subscriberDefinition ?? throw new ArgumentNullException(nameof(subscriberDefinition));
         ConsumerSubscriptions = subscriptions ?? throw new ArgumentNullException(nameof(subscriptions));
         _onUnsubscribe = onUnsubscribe;
+    }
+
+    public IEnumerable<ConsumerSubscription> CheckForCorruptedSubsriptions()
+    {
+        ConsumerSubscription[] snapshot;
+
+        lock (_lock)
+        {
+            snapshot = ConsumerSubscriptions.Values.ToArray();
+        }
+
+        foreach (var sub in snapshot)
+            if (sub.IsFaulted)
+                yield return sub;
     }
 
     /// <summary>

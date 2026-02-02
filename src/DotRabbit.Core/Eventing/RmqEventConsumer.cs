@@ -1,7 +1,7 @@
 ﻿using DotRabbit.Abstractions;
 using DotRabbit.Core.Eventing.Abstract;
+using DotRabbit.Core.Eventing.DomainEventGroup;
 using DotRabbit.Core.Eventing.Entities;
-using DotRabbit.Core.Eventing.Listeners;
 using DotRabbit.Core.Messaging;
 using DotRabbit.Core.Messaging.Entities;
 using DotRabbit.Core.Settings.Abstract;
@@ -21,7 +21,7 @@ internal sealed class RmqEventConsumer
     private readonly ILogger<RmqEventConsumer> _logger;
     private readonly MessageWorkerPool _workerPool;
     private readonly ITopologyStrategy _topologyStrategy;
-    private readonly ConcurrentDictionary<Listener, ListenerSubscription> _subscriptions = [];
+    private readonly ConcurrentDictionary<DomainEventGroupSubscriberDefinition, DomainEventGroupSubscription> _subscriptions = [];
     private readonly ConcurrentDictionary<string, int> _restarting = [];
 
     public RmqEventConsumer(
@@ -37,36 +37,34 @@ internal sealed class RmqEventConsumer
         _topologyStrategy = topologyStrategy;
     }
 
-    public async Task<ListenerSubscription> SubscribeAsync(
-        Listener listener,
+    public async Task<DomainEventGroupSubscription> SubscribeAsync(
+        DomainEventGroupSubscriberDefinition subscriberDefinition,
         IReadOnlyCollection<EventDefinition> events,
         CancellationToken ct = default)
     {
-        if (_subscriptions.ContainsKey(listener))
-            throw new InvalidOperationException($"Listener {listener.Id} already subscribed");
+        if (_subscriptions.ContainsKey(subscriberDefinition))
+            throw new InvalidOperationException($"Listener {subscriberDefinition.Id} already subscribed");
 
         var queues = await _topologyStrategy
-            .ProvisionTopologyAsync(listener.Domain, events)
+            .ProvisionTopologyAsync(subscriberDefinition.Domain, events)
             .ConfigureAwait(false);
 
-        var connection = await _connectionFactory
-            .GetConnectionAsync(ct)
-            .ConfigureAwait(false);
+        var connection = await _connectionFactory.GetConnectionAsync(ct).ConfigureAwait(false);
 
         // IConnection is a thread safe, so don't worry about using it like shown below :)
         var subscriptionTasks = queues
             .Where(q => q.IsLiveDefinition)
-            .Select(q => ConsumeQueueAsync(connection, listener.Domain, q, ct));
+            .Select(q => ConsumeQueueAsync(connection, subscriberDefinition.Domain, q, ct));
 
         var subscriptions = await Task.WhenAll(subscriptionTasks).ConfigureAwait(false);
 
-        var listenerSubscription = new ListenerSubscription(
-            listener,
+        var listenerSubscription = new DomainEventGroupSubscription(
+            subscriberDefinition,
             subscriptions: subscriptions.ToDictionary(k => k.Queue),
-            onUnsubscribe: () => _subscriptions.TryRemove(listener, out _));
+            onUnsubscribe: () => _subscriptions.TryRemove(subscriberDefinition, out _));
 
-        if (!_subscriptions.TryAdd(listener, listenerSubscription))
-            throw new InvalidOperationException($"Listener {listener.Id} already subscribed");
+        if (!_subscriptions.TryAdd(subscriberDefinition, listenerSubscription))
+            throw new InvalidOperationException($"Listener {subscriberDefinition.Id} already subscribed");
 
         return listenerSubscription;
     }
@@ -109,21 +107,23 @@ internal sealed class RmqEventConsumer
             consumer,
             ct).ConfigureAwait(false);
 
+        var subscription = new ConsumerSubscription(queue, channel, consumerTag);
+
+        consumer.Faulted += subscription.MakeFaulted;
+
         _logger.LogInformation("Started consumer {Queue} tag={Tag}", queue.Name, consumerTag);
 
-        return new ConsumerSubscription(queue, channel, consumerTag);
+        return subscription;
     }
 
-    private async Task RestartConsumerAsync(Listener listener, QueueDefinition queue)
+    public async Task RestartConsumerAsync(DomainEventGroupSubscriberDefinition subscriberDefinition, QueueDefinition queue)
     {
         if (!_restarting.TryAdd(queue.Name, 1))
             return;
 
         try
         {
-            await Task.Delay(5000); //backoff
-
-            if (!_subscriptions.TryGetValue(listener, out var existedListenerSub))
+            if (!_subscriptions.TryGetValue(subscriberDefinition, out var existedListenerSub))
                 throw new InvalidOperationException("Lister not found on consumer restart");
 
             var connection = await _connectionFactory
@@ -132,7 +132,7 @@ internal sealed class RmqEventConsumer
 
             var subscription = await ConsumeQueueAsync(
                 connection,
-                listener.Domain,
+                subscriberDefinition.Domain,
                 queue,
                 CancellationToken.None).ConfigureAwait(false);
 

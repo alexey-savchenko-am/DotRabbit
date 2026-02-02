@@ -1,35 +1,49 @@
 ﻿using DotRabbit.Core.Eventing.Abstract;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DotRabbit.Core.Eventing.Processors;
 
-// Singleton
+/// <summary>
+/// Singleton service.
+/// Responsible for dispatching events to registered processors.
+/// Thread-safe.
+/// </summary>
 internal sealed class EventProcessorInvoker
     : IEventProcessorInvoker
 {
+    private readonly ILogger<EventProcessorInvoker> _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public EventProcessorInvoker(IServiceScopeFactory serviceScopeFactory)
+    public EventProcessorInvoker(
+        ILogger<EventProcessorInvoker> logger, 
+        IServiceScopeFactory serviceScopeFactory)
     {
+        _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public Task InvokeAsync(IEventContainer<IEvent> @event)
+    public async Task InvokeAsync(IEventContainer<IEvent> @event)
     {
         using var scope = _serviceScopeFactory.CreateScope();
 
         var processors = scope.ServiceProvider
-            .GetRequiredService<IEnumerable<IEventProcessor>>();
+          .GetRequiredService<IEnumerable<IEventProcessor>>()
+          .Where(p => p.CanProcess(@event))
+          .ToList();
 
-        var processor = processors.FirstOrDefault(p => p.CanProcess(@event));
-
-        if (processor is null)
+        if (processors.Count == 0)
         {
-            throw new InvalidOperationException(
-                $"No processor registered for event {@event.Event.GetType().Name} " +
-                $"in domain {@event.Domain.Name}");
+            _logger.LogWarning(
+                "No processors registered for event {Event} in domain {Domain}",
+                @event.Event.GetType().Name,
+                @event.Domain.Name);
+
+            return;
         }
 
-        return processor.ProcessAsync(@event);
+        await Task.WhenAll(
+            processors.Select(p => p.ProcessAsync(@event))
+        );
     }
 }

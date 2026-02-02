@@ -8,6 +8,7 @@ namespace DotRabbit.Core.Messaging;
 internal sealed class MessageWorkerPool
     : IAsyncDisposable
 {
+    private int _started = 0;
     public int WorkerCount { get; }
     public ushort BufferSize { get; }
 
@@ -35,8 +36,22 @@ internal sealed class MessageWorkerPool
         BufferSize = bufferSize ?? (ushort)(WorkerCount * 4);
 
         _workersQueue = Channel.CreateBounded<IMessage>(BufferSize);
+    }
 
-        StartWorkers(WorkerCount);
+    public void Start()
+    {
+        if (Interlocked.CompareExchange(ref _started, 1, 0) != 0)
+            return;
+
+        try
+        {
+            StartWorkers(WorkerCount);
+        }
+        catch
+        {
+            Interlocked.Exchange(ref _started, 0);
+            throw;
+        }
     }
 
     public ValueTask EnqueueAsync(IMessage msg)
@@ -50,14 +65,27 @@ internal sealed class MessageWorkerPool
         return ValueTask.CompletedTask;
     }
 
-    public async ValueTask StopAsync()
+    public async ValueTask StopAsync(CancellationToken ct = default)
     {
         _logger.LogInformation("Stopping worker pool...");
 
         _cts.Cancel();
-
         _workersQueue.Writer.TryComplete();
-        await Task.WhenAll(_workersTaskList); 
+
+        try
+        {
+            await Task.WhenAll(_workersTaskList)
+                .WaitAsync(ct)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("Worker pool shutdown cancelled by host");
+        }
+        finally
+        {
+            _started = 0;
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -85,7 +113,7 @@ internal sealed class MessageWorkerPool
         {
             try
             {
-                await WorkerLoop(workerId);
+                await WorkerLoop(workerId).ConfigureAwait(false);
                 delay = TimeSpan.FromSeconds(1);
             }
             catch (Exception ex)
