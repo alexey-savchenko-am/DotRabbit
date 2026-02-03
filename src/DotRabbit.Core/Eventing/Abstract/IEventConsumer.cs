@@ -13,5 +13,6 @@ public interface IEventConsumer
 
     Task RestartConsumerAsync(
         DomainEventGroupSubscriberDefinition subscriberDefinition, 
-        QueueDefinition queue);
+        QueueDefinition queue,
+        CancellationToken ct = default);
 }

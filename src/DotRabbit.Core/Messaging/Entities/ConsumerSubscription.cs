@@ -24,25 +24,42 @@ public sealed class ConsumerSubscription
         Tag = tag;
     }
 
-    public void MakeFaulted() => IsFaulted = true;  
+    public void MakeFaulted() => IsFaulted = true;
 
-    public async ValueTask UnsubscribeAsync()
+    public async ValueTask UnsubscribeAsync(CancellationToken ct = default)
     {
         if (Interlocked.Exchange(ref _unsubscribed, 1) == 1)
             return;
 
-        try
-        {
-            if (Channel.IsOpen)
-                await Channel.BasicCancelAsync(Tag);
-        }
-        catch { /* shutdown race */ }
+        ct.ThrowIfCancellationRequested();
 
         try
         {
-            await Channel.CloseAsync();
+            if (Channel.IsOpen)
+                await Channel.BasicCancelAsync(Tag, noWait: false, ct);
         }
-        catch { }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch
+        {
+            // shutdown race
+        }
+
+        ct.ThrowIfCancellationRequested();
+
+        try
+        {
+            await Channel.CloseAsync(ct);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch
+        {
+        }
 
         await Channel.DisposeAsync();
     }

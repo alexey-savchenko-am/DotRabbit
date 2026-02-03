@@ -11,7 +11,7 @@ internal class DomainEventGroupSubscriber : IAsyncDisposable
     private readonly IEventConsumer _eventConsumer;
     private readonly DomainEventGroupSubscriberDefinition _subscriberDefinition;
     private readonly IReadOnlyList<EventDefinition> _handleEvents;
-    private DomainEventGroupSubscription _subscription;
+    private DomainEventGroupSubscription? _subscription;
     private int _healthChecking;
 
     public DomainEventGroupSubscriber(
@@ -44,27 +44,45 @@ internal class DomainEventGroupSubscriber : IAsyncDisposable
         }
     }
 
-    public async ValueTask HealthCheckAsync()
+    public async Task UnsubscribeAsync(CancellationToken ct = default)
+    {
+        var sub = Interlocked.Exchange(ref _subscription, null);
+        if (sub is not null)
+        {
+            _logger.LogWarning("Unsubscribing subscriptions for {Subscriber} subscriber",
+                _subscriberDefinition.Id);
+
+            await sub.UnsubscribeAsync(ct);
+        }
+    }
+
+    public async Task HealthCheckAsync(CancellationToken ct = default)
     {
         // already checking 
-        if (Interlocked.Exchange(ref _healthChecking, 1) == 1)
-            return;
-
-        if (_subscription is null)
+        if (Interlocked.CompareExchange(ref _healthChecking, 1, 0) == 1)
             return;
 
         try
         {
-            var corrupted = _subscription
-                .CheckForCorruptedSubsriptions()
+            var subscription = _subscription;
+
+            if (subscription is null)
+                return;
+
+            var corrupted = subscription
+                .CheckForCorruptedSubscriptions()
                 .ToArray();
 
             if (corrupted.Length == 0)
                 return;
 
+            _logger.LogWarning("Restarting {Count} corrupted subscriptions for {Subscriber}",
+                corrupted.Length,
+                _subscriberDefinition.Id);
+
             await Task.WhenAll(
                 corrupted.Select(sub =>
-                    _eventConsumer.RestartConsumerAsync(_subscriberDefinition, sub.Queue)))
+                    _eventConsumer.RestartConsumerAsync(_subscriberDefinition, sub.Queue, ct)))
                         .ConfigureAwait(false);
         }
         finally
@@ -73,8 +91,8 @@ internal class DomainEventGroupSubscriber : IAsyncDisposable
         }
     }
 
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
-        throw new NotImplementedException();
+        await UnsubscribeAsync();
     }
 }

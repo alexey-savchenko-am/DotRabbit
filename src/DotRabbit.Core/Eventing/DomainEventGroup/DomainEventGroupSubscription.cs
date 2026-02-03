@@ -22,7 +22,7 @@ public sealed record DomainEventGroupSubscription
         _onUnsubscribe = onUnsubscribe;
     }
 
-    public IEnumerable<ConsumerSubscription> CheckForCorruptedSubsriptions()
+    public IEnumerable<ConsumerSubscription> CheckForCorruptedSubscriptions()
     {
         ConsumerSubscription[] snapshot;
 
@@ -48,18 +48,29 @@ public sealed record DomainEventGroupSubscription
         }
     }
 
-    public async ValueTask UnsubscribeAsync()
+    public async ValueTask UnsubscribeAsync(CancellationToken ct = default)
     {
+        var fullyUnsubscribed = true;
+
         foreach (var (_, sub) in ConsumerSubscriptions)
         {
-            await sub.UnsubscribeAsync();
+            try
+            {
+                await sub.UnsubscribeAsync(ct);
+            }
+            catch (OperationCanceledException)
+            {
+                fullyUnsubscribed = false;
+                break;
+            }
         }
 
-        _onUnsubscribe?.Invoke();
+        if (fullyUnsubscribed)
+            _onUnsubscribe?.Invoke();
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        await UnsubscribeAsync();
+        return UnsubscribeAsync();
     }
 }

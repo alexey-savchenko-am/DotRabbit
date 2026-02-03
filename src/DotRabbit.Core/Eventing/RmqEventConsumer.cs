@@ -69,6 +69,37 @@ internal sealed class RmqEventConsumer
         return listenerSubscription;
     }
 
+    public async Task RestartConsumerAsync(
+        DomainEventGroupSubscriberDefinition subscriberDefinition,
+        QueueDefinition queue,
+        CancellationToken ct = default)
+    {
+        if (!_restarting.TryAdd(queue.Name, 1))
+            return;
+
+        try
+        {
+            if (!_subscriptions.TryGetValue(subscriberDefinition, out var existedListenerSub))
+                throw new InvalidOperationException("Lister not found on consumer restart");
+
+            var connection = await _connectionFactory
+                .GetConnectionAsync(ct)
+                .ConfigureAwait(false);
+
+            var subscription = await ConsumeQueueAsync(
+                connection,
+                subscriberDefinition.Domain,
+                queue,
+                ct).ConfigureAwait(false);
+
+            // we need to replace DEAD subscription with a fresh one
+            existedListenerSub.ReplaceSubscription(queue, subscription);
+        }
+        finally
+        {
+            _restarting.TryRemove(queue.Name, out _);
+        }
+    }
 
     private async Task<ConsumerSubscription> ConsumeQueueAsync(
         IConnection connection,
@@ -114,34 +145,5 @@ internal sealed class RmqEventConsumer
         _logger.LogInformation("Started consumer {Queue} tag={Tag}", queue.Name, consumerTag);
 
         return subscription;
-    }
-
-    public async Task RestartConsumerAsync(DomainEventGroupSubscriberDefinition subscriberDefinition, QueueDefinition queue)
-    {
-        if (!_restarting.TryAdd(queue.Name, 1))
-            return;
-
-        try
-        {
-            if (!_subscriptions.TryGetValue(subscriberDefinition, out var existedListenerSub))
-                throw new InvalidOperationException("Lister not found on consumer restart");
-
-            var connection = await _connectionFactory
-                .GetConnectionAsync()
-                .ConfigureAwait(false);
-
-            var subscription = await ConsumeQueueAsync(
-                connection,
-                subscriberDefinition.Domain,
-                queue,
-                CancellationToken.None).ConfigureAwait(false);
-
-            // we need to replace DEAD subscription with a fresh one
-            existedListenerSub.ReplaceSubscription(queue, subscription);
-        }
-        finally
-        {
-            _restarting.TryRemove(queue.Name, out _);
-        }
     }
 }
