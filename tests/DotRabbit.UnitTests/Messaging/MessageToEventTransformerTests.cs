@@ -21,11 +21,12 @@ public class MessageToEventTransformerTests
         var eventId = _fixture.Create<string>();
         var domain = new DomainDefinition("users");
 
+        var eventDef = _eventDefinitionRegistry.Register(typeof(UserCreatedTestEvent), domain);
+
         var headers = new Dictionary<string, object>
         {
             { MessageHeaders.EventId, eventId},
-            { MessageHeaders.EventName, nameof(UserCreatedTestEvent)},
-            { MessageHeaders.EventType, typeof(UserCreatedTestEvent).AssemblyQualifiedName!},
+            { MessageHeaders.EventName, eventDef.Name},
             { MessageHeaders.Domain, domain.Name},
         };
 

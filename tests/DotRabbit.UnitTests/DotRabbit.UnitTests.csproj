@@ -21,8 +21,4 @@
 	  <ProjectReference Include="..\..\src\DotRabbit.Core\DotRabbit.Core.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Eventing\" />
-	</ItemGroup>
-
 </Project>

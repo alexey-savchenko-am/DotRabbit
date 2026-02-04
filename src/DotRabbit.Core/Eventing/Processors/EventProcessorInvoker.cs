@@ -1,4 +1,5 @@
 ﻿using DotRabbit.Core.Eventing.Abstract;
+using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -14,36 +15,32 @@ internal sealed class EventProcessorInvoker
 {
     private readonly ILogger<EventProcessorInvoker> _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IReadOnlyDictionary<DomainDefinition, IEventProcessorFactory> _factories;
 
     public EventProcessorInvoker(
         ILogger<EventProcessorInvoker> logger, 
-        IServiceScopeFactory serviceScopeFactory)
+        IServiceScopeFactory serviceScopeFactory,
+        IEnumerable<IEventProcessorFactory> factories)
     {
         _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
+        _factories = factories.ToDictionary(f => f.Domain);
     }
 
     public async Task InvokeAsync(IEventContainer<IEvent> @event)
     {
         using var scope = _serviceScopeFactory.CreateScope();
 
-        var processors = scope.ServiceProvider
-          .GetRequiredService<IEnumerable<IEventProcessor>>()
-          .Where(p => p.CanProcess(@event))
-          .ToList();
-
-        if (processors.Count == 0)
+        if (!_factories.TryGetValue(@event.Domain, out var factory))
         {
-            _logger.LogWarning(
-                "No processors registered for event {Event} in domain {Domain}",
-                @event.Event.GetType().Name,
-                @event.Domain.Name);
-
-            return;
+            throw new InvalidOperationException(
+                $"No processor factory for domain {@event.Domain.Name} registered");
         }
 
-        await Task.WhenAll(
-            processors.Select(p => p.ProcessAsync(@event))
-        );
+        var processor = factory.Resolve(
+            @event.Event.GetType(), 
+            scope.ServiceProvider);
+
+        await processor.ProcessAsync(@event).ConfigureAwait(false);
     }
 }

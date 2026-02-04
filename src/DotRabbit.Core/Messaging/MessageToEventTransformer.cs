@@ -10,18 +10,18 @@ namespace DotRabbit.Core.Messaging;
 internal sealed class MessageToEventTransformer : IMessageToEventTransformer
 {
     private readonly ILogger<MessageToEventTransformer> _logger;
-    private readonly IEventTypeRegistry _eventTypeRegistry;
+    private readonly IEventDefinitionRegistry _eventDefinitionRegistry;
     private readonly IEventContainerFactory _eventContainerFactory;
     private readonly IEventSerializer _eventSerializer;
 
     public MessageToEventTransformer(
         ILogger<MessageToEventTransformer> logger,
-        IEventTypeRegistry eventTypeRegistry,
+        IEventDefinitionRegistry eventDefinitionRegistry,
         IEventContainerFactory eventContainerFactory,
         IEventSerializer eventSerializer)
     {
         _logger = logger;
-        _eventTypeRegistry = eventTypeRegistry;
+        _eventDefinitionRegistry = eventDefinitionRegistry;
         _eventContainerFactory = eventContainerFactory;
         _eventSerializer = eventSerializer;
     }
@@ -29,17 +29,18 @@ internal sealed class MessageToEventTransformer : IMessageToEventTransformer
     public IEventContainer<IEvent> Transform(IMessage message)
     {
         var id = message.GetRequiredHeader(MessageHeaders.EventId);
-        var eventTypeStr = message.GetRequiredHeader(MessageHeaders.EventType);
-        var eventName = message.GetHeader(MessageHeaders.EventName);
+        var eventName = message.GetRequiredHeader(MessageHeaders.EventName);
         var domain = message.GetHeader(MessageHeaders.Domain) ?? message.Exchange;
 
         _logger.LogDebug("Transforming message id={Id} {Message} to event started.", id, message);
 
-        var eventType = _eventTypeRegistry.GetByName(eventTypeStr);
+        var domainDefinition = new DomainDefinition(domain);
+
+        var eventType = _eventDefinitionRegistry.GetByNameWithinDomain(eventName, domainDefinition).Type;
 
         var @event = _eventSerializer.Deserialize(message.BodyStr, eventType);
 
-        var data = new EventContainerData(id, new DomainDefinition(domain), message);
+        var data = new EventContainerData(id, domainDefinition, message);
 
         var container = _eventContainerFactory.Create(data, @event);
 

@@ -43,7 +43,6 @@ internal sealed class EventPublisher
             {
                 {MessageHeaders.EventId, id },
                 {MessageHeaders.Domain, domain.Name },
-                {MessageHeaders.EventType, routingKey },
                 {MessageHeaders.EventName, routingKey },
                 {MessageHeaders.RetryCount, 0 },
                 {MessageHeaders.PublishDateTime, DateTime.UtcNow.ToString() },

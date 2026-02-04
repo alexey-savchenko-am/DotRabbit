@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using DotRabbit.Core.Eventing.Abstract;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace DotRabbit.Core.Eventing.DomainEventGroup;
@@ -7,12 +8,12 @@ internal sealed class DomainEventGroupSubscriberHostedService
     : IHostedService
 {
     private readonly ILogger<DomainEventGroupSubscriberHostedService> _logger;
-    private readonly IReadOnlyList<DomainEventGroupSubscriber> _subscribers;
+    private readonly IReadOnlyList<IDomainEventGroupSubscriber> _subscribers;
     private int _stopped = 0;
 
     public DomainEventGroupSubscriberHostedService(
         ILogger<DomainEventGroupSubscriberHostedService> logger,
-        IEnumerable<DomainEventGroupSubscriber> subscribers)
+        IEnumerable<IDomainEventGroupSubscriber> subscribers)
     {
         _logger = logger;
         _subscribers = subscribers.ToList();

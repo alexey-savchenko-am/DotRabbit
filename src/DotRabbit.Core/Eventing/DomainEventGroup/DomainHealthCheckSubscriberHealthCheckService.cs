@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using DotRabbit.Core.Eventing.Abstract;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace DotRabbit.Core.Eventing.DomainEventGroup;
@@ -8,11 +9,11 @@ internal sealed class DomainHealthCheckSubscriberHealthCheckService
 {
     private readonly ILogger<DomainHealthCheckSubscriberHealthCheckService> _logger;
     private readonly TimeSpan _period;
-    private readonly IReadOnlyList<DomainEventGroupSubscriber> _subscribers;
+    private readonly IReadOnlyList<IDomainEventGroupSubscriber> _subscribers;
 
     public DomainHealthCheckSubscriberHealthCheckService(
         ILogger<DomainHealthCheckSubscriberHealthCheckService> logger,
-        IEnumerable<DomainEventGroupSubscriber> subscribers,
+        IEnumerable<IDomainEventGroupSubscriber> subscribers,
         TimeSpan period)
     {
         _logger = logger;

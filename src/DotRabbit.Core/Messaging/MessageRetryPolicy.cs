@@ -57,7 +57,6 @@ internal class MessageRetryPolicy
         {
             {MessageHeaders.EventId, msg.GetHeader(MessageHeaders.EventId)},
             {MessageHeaders.Domain, domain },
-            {MessageHeaders.EventType, msg.GetRequiredHeader(MessageHeaders.EventType) },
             {MessageHeaders.EventName, msg.GetRequiredHeader(MessageHeaders.EventName) },
             {MessageHeaders.RetryCount, msg.RetryCount + 1 },
             {MessageHeaders.PublishDateTime, DateTime.UtcNow.ToString() },

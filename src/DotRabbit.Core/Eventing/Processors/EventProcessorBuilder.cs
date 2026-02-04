@@ -1,15 +1,17 @@
-﻿
-using DotRabbit.Core.Eventing.Abstract;
-using DotRabbit.Core.Eventing.Processors;
+﻿using DotRabbit.Core.Eventing.Abstract;
 using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DotRabbit.Core.Configuration.Builders;
+namespace DotRabbit.Core.Eventing.Processors;
+
 
 public sealed class EventProcessorBuilder
 {
-    private readonly List<Func<IServiceProvider, IEventProcessor>> _factories = [];
+    private readonly Dictionary<Type, Func<IServiceProvider, IEventProcessor>> _map = [];
     private readonly DomainDefinition _domain;
+
+    public IReadOnlyList<Type> EventTypes =>
+        [.. _map.Keys];
 
     public EventProcessorBuilder(DomainDefinition domain)
     {
@@ -20,16 +22,15 @@ public sealed class EventProcessorBuilder
         where TEvent : IEvent
         where THandler : IEventHandler<TEvent>
     {
-        _factories.Add(sp =>
+        _map[typeof(TEvent)] = sp =>
             new EventProcessor<TEvent, THandler>(
                 _domain,
                 sp.GetRequiredService<THandler>
-            )
-        );
+            );
 
         return this;
     }
 
-    public IReadOnlyList<Func<IServiceProvider, IEventProcessor>> Build()
-        => _factories;
+    public IEventProcessorFactory Build()
+        => new EventProcessorFactory(_domain, _map);
 }

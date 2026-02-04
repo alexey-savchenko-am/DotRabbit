@@ -1,11 +1,9 @@
-﻿using DotRabbit.Core.Configuration.Builders;
-using DotRabbit.Core.Eventing.Abstract;
+﻿using DotRabbit.Core.Eventing.Abstract;
 using DotRabbit.Core.Eventing.DomainEventGroup;
 using DotRabbit.Core.Eventing.Entities;
 using DotRabbit.Core.Eventing.Processors;
 using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace DotRabbit.Core.Configuration.Extensions;
@@ -17,26 +15,33 @@ public static class ConsumerServiceCollectionExtensions
         DomainDefinition domain,
         Func<EventProcessorBuilder, EventProcessorBuilder> builder)
     {
-        var factories = builder(new EventProcessorBuilder(domain)).Build();
+        var eventProcessorBuilder = builder(new EventProcessorBuilder(domain));
 
-        services.TryAddSingleton(provider =>
+        // one factory per each Domain
+        services.AddSingleton<IEventProcessorFactory>(
+            eventProcessorBuilder.Build()
+        );
+
+        // one subscriber per each Domain
+        services.AddSingleton<IDomainEventGroupSubscriber>(provider =>
         {
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             var consumer = provider.GetRequiredService<IEventConsumer>();
+            var registry = provider.GetRequiredService<IEventDefinitionRegistry>();
+
+            foreach (var eventType in eventProcessorBuilder.EventTypes)
+                registry.Register(eventType, domain);
+
             var subscriberInfo = new DomainEventGroupSubscriberDefinition(Guid.NewGuid(), domain);
-
-            var processors = new List<IEventProcessor>(factories.Count);
-            foreach (var factory in factories)
-                processors.Add(factory(provider));
-
+            
             var subscriber = new DomainEventGroupSubscriber(
                logger: loggerFactory.CreateLogger<DomainEventGroupSubscriber>(),
                consumer,
                subscriberInfo,
-               processors
+               registry
             );
+
             return subscriber;
         });
-
     }
 }

@@ -5,7 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace DotRabbit.Core.Eventing.DomainEventGroup;
 
-internal class DomainEventGroupSubscriber : IAsyncDisposable
+internal class DomainEventGroupSubscriber 
+    : IDomainEventGroupSubscriber
+    , IAsyncDisposable
 {
     private readonly ILogger<DomainEventGroupSubscriber> _logger;
     private readonly IEventConsumer _eventConsumer;
@@ -18,12 +20,12 @@ internal class DomainEventGroupSubscriber : IAsyncDisposable
         ILogger<DomainEventGroupSubscriber> logger,
         IEventConsumer eventConsumer,
         DomainEventGroupSubscriberDefinition subscriberDefinition,
-        IReadOnlyList<EventDefinition> handleEvents)
+        IEventDefinitionRegistry eventDefinitionRegistry)
     {
         _logger = logger;
         _eventConsumer = eventConsumer;
         _subscriberDefinition = subscriberDefinition;
-        _handleEvents = handleEvents;
+        _handleEvents = [.. eventDefinitionRegistry.GetAllByDomain(subscriberDefinition.Domain)];
     }
 
     public async Task<bool> SubscribeAsync(CancellationToken ct = default)
