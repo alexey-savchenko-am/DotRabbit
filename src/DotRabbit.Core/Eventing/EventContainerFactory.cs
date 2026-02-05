@@ -1,5 +1,6 @@
 ﻿using DotRabbit.Core.Eventing.Abstract;
 using DotRabbit.Core.Eventing.Entities;
+using DotRabbit.Core.Settings.Entities;
 
 namespace DotRabbit.Core.Eventing;
 
@@ -8,11 +9,11 @@ internal sealed class EventContainerFactory
 {
     private readonly Dictionary<Type, Func<EventContainerData, IEvent, IEventContainer<IEvent>>> _factories = [];
 
-    public EventContainerFactory(IEnumerable<Type> eventTypes)
+    public EventContainerFactory(IEnumerable<EventDefinition> events)
     {
-        foreach (var type in eventTypes)
+        foreach (var e in events)
         {
-            Register(type);
+            Register(e.Type);
         }
     }
 

@@ -14,11 +14,14 @@ public class EventContainerFactoryTests
     [Fact]
     public void Create_ReturnsEventContainer_WithRegisteredEventType()
     {
-        
-        var factory = new EventContainerFactory([typeof(UserCreatedTestEvent)]);
+        var domain = _fixture.Create<DomainDefinition>();
+        var registry = new EventDefinitionRegistry();
+        registry.Register(typeof(UserCreatedTestEvent), domain);
+
+        var factory = new EventContainerFactory([.. registry.GetAll()]);
 
         var msg = _fixture.Create<Message>();
-        var domain = _fixture.Create<DomainDefinition>();
+   
         var id = _fixture.Create<string>();
         var data = new EventContainerData(id, domain, msg);
         var evt = _fixture.Create<UserCreatedTestEvent>();

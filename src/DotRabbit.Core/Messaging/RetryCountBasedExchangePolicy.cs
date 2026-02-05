@@ -6,17 +6,27 @@ using Microsoft.Extensions.Logging;
 
 namespace DotRabbit.Core.Messaging;
 
-internal class MessageRetryPolicy
+/// <summary>
+/// Retry policy that routes messages to a retry exchange while the retry count
+/// is below the configured limit and to a dead-letter exchange (DLX) once the
+/// maximum retry count is exceeded.
+/// </summary>
+/// <remarks>
+/// This policy is stateless and is intended to be registered as a Singleton.
+/// It relies solely on message metadata (RetryCount) and configuration values
+/// and does not keep any per-message or per-request state.
+/// </remarks>
+internal class RetryCountBasedExchangePolicy
     : IMessageRetryPolicy
 {
     public int MaxRetryCount { get; }
 
-    private readonly ILogger<MessageRetryPolicy> _logger;
+    private readonly ILogger<RetryCountBasedExchangePolicy> _logger;
     private readonly IServiceInfo _serviceInfo;
     private readonly IMessageSender _messageSender;
 
-    public MessageRetryPolicy(
-        ILogger<MessageRetryPolicy> logger,
+    public RetryCountBasedExchangePolicy(
+        ILogger<RetryCountBasedExchangePolicy> logger,
         IServiceInfo serviceInfo,
         IMessageSender messageSender,
         int maxRetryCount = 5)

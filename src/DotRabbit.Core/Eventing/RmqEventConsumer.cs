@@ -107,6 +107,8 @@ internal sealed class RmqEventConsumer
         QueueDefinition queue,
         CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
+
         // I don't use an object from RmqChannelPool for long-live Channels
         var channel = await connection
             .CreateChannelAsync(cancellationToken: ct)
@@ -118,12 +120,20 @@ internal sealed class RmqEventConsumer
             global: false,
             ct).ConfigureAwait(false);
 
-        var deliveryStatusQueue = Channel.CreateUnbounded<DeliveryStatus>();
+        var deliveryStatusQueue = Channel.CreateBounded<DeliveryStatus>(
+            new BoundedChannelOptions(_workerPool.BufferSize)
+            {
+                SingleReader = true,
+                SingleWriter = false,
+                FullMode = BoundedChannelFullMode.Wait
+            });
 
         var ackDispatcher = new AckNackDispatcher(
             _loggerFactory.CreateLogger<AckNackDispatcher>(),
             channel,
-            deliveryStatusQueue);
+            domain,
+            deliveryStatusQueue,
+            ct);
 
         var consumer = new RmqMessageConsumer(
             _loggerFactory.CreateLogger<RmqMessageConsumer>(),
@@ -138,11 +148,19 @@ internal sealed class RmqEventConsumer
             consumer,
             ct).ConfigureAwait(false);
 
-        var subscription = new ConsumerSubscription(queue, channel, consumerTag);
+        var subscription = new ConsumerSubscription(
+            queue, 
+            channel, 
+            ackDispatcher, 
+            consumerTag);
 
         consumer.Faulted += subscription.MakeFaulted;
 
-        _logger.LogInformation("Started consumer {Queue} tag={Tag}", queue.Name, consumerTag);
+        _logger.LogInformation(
+            "Started consumer for domain {Domain}, queue {Queue}, tag={Tag}",
+            domain.Name,
+            queue.Name,
+            consumerTag);
 
         return subscription;
     }

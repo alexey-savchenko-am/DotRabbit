@@ -58,6 +58,14 @@ internal sealed class EventDefinitionRegistry : IEventDefinitionRegistry
             .AsReadOnly();
     }
 
+    public IReadOnlyCollection<EventDefinition> GetAll()
+    {
+        return _registeredEventDefinitions
+            .Select(x => x.Value)
+            .ToList()
+            .AsReadOnly();
+    }
+
     public EventDefinition GetByNameWithinDomain(
         string eventName,
         DomainDefinition domain)

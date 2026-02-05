@@ -23,9 +23,11 @@ public abstract class TestSeed
     protected TestSeed()
     {
         _serviceInfo = new ServiceInfo("TestService");
-        _eventContainerFactory = new EventContainerFactory([typeof(UserCreatedTestEvent)]);
-        _eventSerializer = new JsonBasedEventSerializer();
         _eventDefinitionRegistry = new EventDefinitionRegistry();
+        _eventDefinitionRegistry.Register(typeof(UserCreatedTestEvent), new DomainDefinition("users"));
+        _eventContainerFactory = new EventContainerFactory([.. _eventDefinitionRegistry.GetAll()]);
+        _eventSerializer = new JsonBasedEventSerializer();
+       
 
         _messageToEventTransformer = new MessageToEventTransformer(
                 NullLogger<MessageToEventTransformer>.Instance,

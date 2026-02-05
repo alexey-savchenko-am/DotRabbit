@@ -10,5 +10,7 @@ public interface IEventDefinitionRegistry
 
     IReadOnlyCollection<EventDefinition> GetAllByDomain(DomainDefinition domain);
 
+    IReadOnlyCollection<EventDefinition> GetAll();
+
     EventDefinition GetByNameWithinDomain(string eventName, DomainDefinition domain);
 }
