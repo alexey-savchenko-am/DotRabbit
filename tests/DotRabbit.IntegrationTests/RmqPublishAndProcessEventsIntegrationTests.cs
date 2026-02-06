@@ -1,0 +1,74 @@
+﻿using AutoFixture;
+using DotRabbit.Core.Settings.Entities;
+using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace DotRabbit.IntegrationTests;
+
+public class RmqPublishAndProcessEventsIntegrationTests : IAsyncLifetime
+{
+    private readonly RabbitMqFixture _rabbit = new();
+    private readonly TestServerHarness _server;
+    private readonly ITestOutputHelper _output;
+
+    public RmqPublishAndProcessEventsIntegrationTests(ITestOutputHelper output)
+    {
+        _server = new TestServerHarness(output);
+        _output = output;
+    }
+
+    public async Task InitializeAsync()
+    {
+        await _rabbit.StartAsync();
+        await _server.StartAsync(_rabbit.ConnectionString);
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _rabbit.DisposeAsync();
+        await _server.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task PublishEventToRmq_ProcessSuccesfully_WhenEventIsCorrect()
+    {
+        var userCreatedEvent = _server.Fixture.Create<UserCreatedTestEvent>();
+
+        await _server.EventPublisher.PublishAsync(new DomainDefinition("users"), userCreatedEvent);
+
+        var @event = await _server.UserCreatedEventSignal.WaitAsync(TimeSpan.FromSeconds(5));
+
+        @event.Event.Name.Should().Be(userCreatedEvent.Name);
+        @event.Event.UserId.Should().Be(userCreatedEvent.UserId);
+        @event.Event.CreatedOnUtc.Should().Be(userCreatedEvent.CreatedOnUtc);
+    }
+
+    [Fact]
+    public async Task PublishMultipleEventsToRmq_ProcessSuccesfully_WhenEventIsCorrect()
+    {
+        var eventCount = 10_000;
+        var counter = _server.Services.GetRequiredService<EventProcessingCounter>();
+        counter.Reset(eventCount);
+
+
+        var tasks = Enumerable.Range(0, eventCount)
+            .Select(_ =>
+            {
+                var evt = _server.Fixture.Create<UserCreatedTestEvent>();
+                return _server.EventPublisher.PublishAsync(new DomainDefinition("users"), evt);
+            });
+
+        await Task.WhenAll(tasks);
+
+        var elapsedMs = await counter.WaitAsync(TimeSpan.FromSeconds(20));
+
+        _output.WriteLine(
+            "{0} events have been processed in {1}ms",
+            eventCount,
+            elapsedMs
+        );
+    }
+
+}

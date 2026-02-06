@@ -9,12 +9,8 @@ internal sealed class EventContainerFactory
 {
     private readonly Dictionary<Type, Func<EventContainerData, IEvent, IEventContainer<IEvent>>> _factories = [];
 
-    public EventContainerFactory(IEnumerable<EventDefinition> events)
+    public EventContainerFactory()
     {
-        foreach (var e in events)
-        {
-            Register(e.Type);
-        }
     }
 
     public IEventContainer<IEvent> Create(EventContainerData data, IEvent @event)
@@ -29,7 +25,7 @@ internal sealed class EventContainerFactory
         return factory(data, @event);
     }
 
-    private void Register(Type eventType)
+    public void Register(Type eventType)
     {
         _factories[eventType] = EventContainerFactoryBuilder.Build(eventType);
     }

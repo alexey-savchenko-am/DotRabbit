@@ -17,21 +17,25 @@ public static class ConsumerServiceCollectionExtensions
     {
         var eventProcessorBuilder = builder(new EventProcessorBuilder(domain));
 
-        // one factory per each Domain
+        // one factory per Domain
         services.AddSingleton<IEventProcessorFactory>(
             eventProcessorBuilder.Build()
         );
 
-        // one subscriber per each Domain
+        // one subscriber per Domain
         services.AddSingleton<IDomainEventGroupSubscriber>(provider =>
         {
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             var consumer = provider.GetRequiredService<IEventConsumer>();
             var registry = provider.GetRequiredService<IEventDefinitionRegistry>();
+            var factory = provider.GetRequiredService<IEventContainerFactory>();
 
             foreach (var eventType in eventProcessorBuilder.EventTypes)
+            {
                 registry.Register(eventType, domain);
-
+                factory.Register(eventType);
+            }
+               
             var subscriberInfo = new DomainEventGroupSubscriberDefinition(Guid.NewGuid(), domain);
             
             var subscriber = new DomainEventGroupSubscriber(

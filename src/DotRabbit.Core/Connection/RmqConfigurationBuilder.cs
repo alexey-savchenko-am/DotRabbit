@@ -9,6 +9,7 @@ public class RmqConfigurationBuilder
     private string _virtualHost = "/";
     private bool _automaticRecoveryEnabled = true;
     private bool _built;
+    private RmqConnectionConfiguration? _configuration;
 
     private RmqConfigurationBuilder() { }
 
@@ -56,14 +57,13 @@ public class RmqConfigurationBuilder
         return this;
     }
 
-    public static RmqConnectionConfiguration FromConnectionString(
+    public RmqConfigurationBuilder FromConnectionString(
         string connectionString,
         bool automaticRecoveryEnabled = true)
     {
-        var config = RmqConnectionConfiguration
+        _configuration = RmqConnectionConfiguration
             .FromConnectionString(connectionString, automaticRecoveryEnabled);
-
-        return config;
+        return this;
     }
 
     public RmqConnectionConfiguration Build()
@@ -71,6 +71,12 @@ public class RmqConfigurationBuilder
         if (_built)
             throw new InvalidOperationException("Builder already used");
 
+        if(_configuration is not null)
+        {
+            _built = true;
+            return _configuration;
+        }
+           
         if (_hosts.Count == 0)
             throw new InvalidOperationException(
                 "At least one RMQ host must be specified");

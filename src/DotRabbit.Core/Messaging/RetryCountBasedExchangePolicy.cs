@@ -63,12 +63,12 @@ internal class RetryCountBasedExchangePolicy
             ? RmqTopologyResolver.ResolveRetryExchange(service, domain) 
             : RmqTopologyResolver.ResolveDlxExchange(service, domain);
 
-        var headers = new Dictionary<string, object?>
+        var headers = new Dictionary<string, string?>
         {
             {MessageHeaders.EventId, msg.GetHeader(MessageHeaders.EventId)},
-            {MessageHeaders.Domain, domain },
+            {MessageHeaders.Domain, domain.Name },
             {MessageHeaders.EventName, msg.GetRequiredHeader(MessageHeaders.EventName) },
-            {MessageHeaders.RetryCount, msg.RetryCount + 1 },
+            {MessageHeaders.RetryCount, (msg.RetryCount + 1).ToString() },
             {MessageHeaders.PublishDateTime, DateTime.UtcNow.ToString() },
         };
 

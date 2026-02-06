@@ -14,11 +14,11 @@ internal sealed record Message
     public string Exchange { get; }
     public string RoutingKey { get; }
     public ReadOnlyMemory<byte> Body { get; }
-    public IReadOnlyDictionary<string, object?> Headers { get; }
+    public IReadOnlyDictionary<string, string?> Headers { get; }
 
     public int RetryCount =>
         Headers.TryGetValue(MessageHeaders.RetryCount, out var v)
-            ? (int)(v ?? 0)
+            ? int.Parse(v ?? "0")
             : 0;
 
     //Lazy body content 
@@ -34,7 +34,7 @@ internal sealed record Message
         string exchange,
         string routingKey,
         ReadOnlyMemory<byte> body,
-        IReadOnlyDictionary<string, object?> headers)
+        IReadOnlyDictionary<string, string?> headers)
     {
         Status = DeliveryStatusCode.Delivered;
         Type = type;
@@ -52,7 +52,7 @@ internal sealed record Message
         string exchange,
         string routingKey,
         ReadOnlyMemory<byte> body,
-        IReadOnlyDictionary<string, object?>? headers = null)
+        IReadOnlyDictionary<string, string?>? headers = null)
     {
         ArgumentNullException.ThrowIfNull(exchange);
 
@@ -73,7 +73,7 @@ internal sealed record Message
         string exchange,
         string routingKey,
         ReadOnlyMemory<byte> body,
-        IReadOnlyDictionary<string, object?>? headers = null)
+        IReadOnlyDictionary<string, string?>? headers = null)
     {
         ArgumentNullException.ThrowIfNull(exchange);
 

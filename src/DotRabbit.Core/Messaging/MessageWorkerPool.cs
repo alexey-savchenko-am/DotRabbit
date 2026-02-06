@@ -99,7 +99,8 @@ internal sealed class MessageWorkerPool
 
         for (int workerId = 0; workerId < workerCount; workerId++)
         {
-            var task = Task.Run(() => WorkerSupervisor(workerId));
+            int id = workerId;
+            var task = Task.Run(() => WorkerSupervisor(id));
             _workersTaskList.Add(task);
         }
     }

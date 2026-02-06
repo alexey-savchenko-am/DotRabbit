@@ -18,7 +18,9 @@ public class EventContainerFactoryTests
         var registry = new EventDefinitionRegistry();
         registry.Register(typeof(UserCreatedTestEvent), domain);
 
-        var factory = new EventContainerFactory([.. registry.GetAll()]);
+        var factory = new EventContainerFactory();
+
+        factory.Register(typeof(UserCreatedTestEvent));
 
         var msg = _fixture.Create<Message>();
    

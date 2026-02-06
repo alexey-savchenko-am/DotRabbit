@@ -1,20 +1,20 @@
 ﻿namespace DotRabbit.Core.Messaging.Entities;
 
-internal sealed class EmptyHeaders : IReadOnlyDictionary<string, object?>
+internal sealed class EmptyHeaders : IReadOnlyDictionary<string, string?>
 {
     public static readonly EmptyHeaders Instance = new();
 
     private EmptyHeaders() { }
 
-    public object? this[string key] => throw new KeyNotFoundException();
+    public string? this[string key] => throw new KeyNotFoundException();
     public IEnumerable<string> Keys => [];
-    public IEnumerable<object?> Values => [];
+    public IEnumerable<string?> Values => [];
     public int Count => 0;
 
     public bool ContainsKey(string key) => false;
-    public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
-        => Enumerable.Empty<KeyValuePair<string, object?>>().GetEnumerator();
-    public bool TryGetValue(string key, out object? value)
+    public IEnumerator<KeyValuePair<string, string?>> GetEnumerator()
+        => Enumerable.Empty<KeyValuePair<string, string?>>().GetEnumerator();
+    public bool TryGetValue(string key, out string? value)
     {
         value = null;
         return false;

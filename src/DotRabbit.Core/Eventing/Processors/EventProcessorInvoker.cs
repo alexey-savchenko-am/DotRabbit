@@ -2,6 +2,7 @@
 using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace DotRabbit.Core.Eventing.Processors;
 
@@ -29,6 +30,7 @@ internal sealed class EventProcessorInvoker
 
     public async Task InvokeAsync(IEventContainer<IEvent> @event)
     {
+        var sw = Stopwatch.StartNew();
         using var scope = _serviceScopeFactory.CreateScope();
 
         if (!_factories.TryGetValue(@event.Domain, out var factory))
@@ -42,5 +44,7 @@ internal sealed class EventProcessorInvoker
             scope.ServiceProvider);
 
         await processor.ProcessAsync(@event).ConfigureAwait(false);
+
+        _logger.LogDebug("EventProcessorInvoker message id={Id} {Elapsed} ms", @event.Id, sw.ElapsedMilliseconds);
     }
 }

@@ -3,6 +3,7 @@ using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
 using System.Threading.Channels;
 
 namespace DotRabbit.Core.Messaging;
@@ -45,15 +46,15 @@ internal sealed class RmqMessageConsumer
         try
         {
             var headers = properties.Headers?
-                .ToDictionary(k => k.Key, v => v.Value);
+                .ToDictionary(k => k.Key, v => HeaderValueToString(v.Value));
 
             var msg = Message.CreateIncoming(
                 _deliveryStatusProducer, 
                 deliveryTag, 
                 exchange, 
                 routingKey, 
-                body, 
-                headers);
+                body.ToArray(), 
+                headers!);
 
             await _workerPool.EnqueueAsync(msg);
         }
@@ -85,6 +86,20 @@ internal sealed class RmqMessageConsumer
         return Task.CompletedTask;
     }
 
+    private static string HeaderValueToString(object? value)
+    {
+        if(value is null)
+            return string.Empty;
+
+        return value switch
+        {
+            byte[] bytes => Encoding.UTF8.GetString(bytes),
+            ReadOnlyMemory<byte> rom => Encoding.UTF8.GetString(rom.Span),
+            string s => s,
+            null => string.Empty,
+            _ => value.ToString() ?? string.Empty
+        };
+    }
     private void SignalFault()
     {
         if (Interlocked.Exchange(ref _signaled, 1) == 1)

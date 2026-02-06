@@ -23,7 +23,7 @@ public class MessageToEventTransformerTests
 
         var eventDef = _eventDefinitionRegistry.Register(typeof(UserCreatedTestEvent), domain);
 
-        var headers = new Dictionary<string, object>
+        var headers = new Dictionary<string, string>
         {
             { MessageHeaders.EventId, eventId},
             { MessageHeaders.EventName, eventDef.Name},

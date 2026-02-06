@@ -5,7 +5,7 @@ public record QueueDefinition
     public static QueueDefinition DefineLive(string name) => Create(name, "live");  
     public static QueueDefinition DefineRetry(string name) => Create(name, "retry");  
     public static QueueDefinition DefineDead(string name) => Create(name, "dead");
-    public bool IsLiveDefinition => Name.Equals("live", StringComparison.OrdinalIgnoreCase);
+    public bool IsLiveDefinition => Type.Equals("live", StringComparison.OrdinalIgnoreCase);
 
     public string Name { get; }
     public string Type { get; }

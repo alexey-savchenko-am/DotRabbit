@@ -4,6 +4,8 @@ using DotRabbit.Core.Messaging.Abstract;
 using DotRabbit.Core.Settings.Abstract;
 using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace DotRabbit.Core.Messaging;
 
@@ -28,6 +30,7 @@ internal sealed class MessageToEventTransformer : IMessageToEventTransformer
 
     public IEventContainer<IEvent> Transform(IMessage message)
     {
+        var sw = Stopwatch.StartNew();
         var id = message.GetRequiredHeader(MessageHeaders.EventId);
         var eventName = message.GetRequiredHeader(MessageHeaders.EventName);
         var domain = message.GetHeader(MessageHeaders.Domain) ?? message.Exchange;
@@ -36,16 +39,29 @@ internal sealed class MessageToEventTransformer : IMessageToEventTransformer
 
         var domainDefinition = new DomainDefinition(domain);
 
-        var eventType = _eventDefinitionRegistry.GetByNameWithinDomain(eventName, domainDefinition).Type;
+        try
+        {
+            var eventType = _eventDefinitionRegistry.GetByNameWithinDomain(eventName, domainDefinition).Type;
+            var @event = _eventSerializer.Deserialize(message.BodyStr, eventType);
+            var data = new EventContainerData(id, domainDefinition, message);
 
-        var @event = _eventSerializer.Deserialize(message.BodyStr, eventType);
+            var container = _eventContainerFactory.Create(data, @event);
 
-        var data = new EventContainerData(id, domainDefinition, message);
+            _logger.LogDebug("Transforming message id={Id} to event completed.", id);
+            _logger.LogDebug("Transform message to event message id={Id} {Elapsed} ms", id, sw.ElapsedMilliseconds);
 
-        var container = _eventContainerFactory.Create(data, @event);
+            return container;
 
-        _logger.LogDebug("Transforming message id={Id} to event completed.", id);
-
-        return container;
+        }
+        catch (JsonException ex)
+        {
+            // invalid json payload in message
+            _logger.LogError(ex, "Message id={Id} has an invalid json payload: {Body}", id, message.BodyStr);
+            throw;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }

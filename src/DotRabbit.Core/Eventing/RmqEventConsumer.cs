@@ -148,6 +148,8 @@ internal sealed class RmqEventConsumer
             consumer,
             ct).ConfigureAwait(false);
 
+        ackDispatcher.Start();
+
         var subscription = new ConsumerSubscription(
             queue, 
             channel, 

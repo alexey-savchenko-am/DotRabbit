@@ -11,7 +11,9 @@ public class ConnectionBuilderTests
     {
         var connectionString = "amqp://guest:guest@localhost:5671/localhost";
         var config = RmqConfigurationBuilder
-            .FromConnectionString(connectionString);
+            .Create()
+            .FromConnectionString(connectionString)
+            .Build();
 
         var host = config.Hosts.Single();
         config.Scheme.Should().Be(Scheme.Amqp);

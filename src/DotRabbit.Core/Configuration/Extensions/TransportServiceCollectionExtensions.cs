@@ -2,6 +2,7 @@
 using DotRabbit.Core.Connection;
 using DotRabbit.Core.Eventing;
 using DotRabbit.Core.Eventing.Abstract;
+using DotRabbit.Core.Eventing.DomainEventGroup;
 using DotRabbit.Core.Eventing.Processors;
 using DotRabbit.Core.Messaging;
 using DotRabbit.Core.Messaging.Abstract;
@@ -19,7 +20,7 @@ public static class TransportServiceCollectionExtensions
 {
     public static void AddRmqTransport(
         this IServiceCollection services, 
-        string service,
+        string serviceName,
         Func<RmqConfigurationBuilder, RmqConfigurationBuilder> configBuilder)
     {
         // ----------------- Connection------------------------------
@@ -37,7 +38,7 @@ public static class TransportServiceCollectionExtensions
 
         services.AddSingleton<IServiceInfo>(_ =>
         {
-            return new ServiceInfo(service.ToLowerInvariant());
+            return new ServiceInfo(serviceName.ToLowerInvariant());
         });
 
 
@@ -47,7 +48,7 @@ public static class TransportServiceCollectionExtensions
      
         services.TryAddSingleton<ITopologyStrategy, RmqEventPerQueueTopologyStrategy>();
         services.TryAddSingleton<IEventSerializer, JsonBasedEventSerializer>();
-
+        services.AddSingleton<RmqTopologyManager>();
 
         services.TryAddSingleton<IMessageRetryPolicy>(provider =>
         {
@@ -62,11 +63,7 @@ public static class TransportServiceCollectionExtensions
                 maxRetryCount: 5);
         });
 
-        services.TryAddSingleton<IEventContainerFactory>(provider =>
-        {
-            var registry = provider.GetRequiredService<IEventDefinitionRegistry>();
-            return new EventContainerFactory(registry.GetAll());
-        });
+        services.TryAddSingleton<IEventContainerFactory, EventContainerFactory>();
 
         services.TryAddSingleton(provider =>
         {
@@ -85,5 +82,22 @@ public static class TransportServiceCollectionExtensions
         });
 
         services.TryAddSingleton<IEventConsumer, RmqEventConsumer>();
+
+        services.TryAddSingleton<IEventPublisher, EventPublisher>();
+        services.TryAddSingleton<IMessageSender, MessageSender>();
+
+        services.AddHostedService<DomainEventGroupSubscriberHostedService>();
+        services.AddHostedService(provider =>
+        {
+            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+            var subscribers = provider.GetRequiredService<IEnumerable<IDomainEventGroupSubscriber>>();
+
+            return new DomainEventGroupSubscriberHealthCheckService(
+                logger: loggerFactory.CreateLogger<DomainEventGroupSubscriberHealthCheckService>(),
+                subscribers,
+                TimeSpan.FromSeconds(5));
+        });
+        services.AddHostedService<MessageWorkerPoolHostedService>();
+        
     }
 }

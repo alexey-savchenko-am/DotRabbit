@@ -23,7 +23,7 @@ internal sealed class MessageSender : IMessageSender
 
         var props = new BasicProperties
         {
-            Headers = msg.Headers.ToDictionary(),
+            Headers = msg.Headers.ToDictionary(h => h.Key, h => (object?)h.Value),
             DeliveryMode = DeliveryModes.Persistent,
             Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds())
         };

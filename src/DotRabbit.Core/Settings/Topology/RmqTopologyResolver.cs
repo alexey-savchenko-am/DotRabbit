@@ -37,6 +37,6 @@ internal static class RmqTopologyResolver
 
     public static string ResolveRoutingKey<TEvent>() where TEvent : IEvent
     {
-        return typeof(TEvent).GetType().Name.ToKebabNotation();
+        return typeof(TEvent).Name.ToKebabNotation();
     }
 }

@@ -35,10 +35,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Configuration\Builders\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <None Include="..\..\logo.png">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>

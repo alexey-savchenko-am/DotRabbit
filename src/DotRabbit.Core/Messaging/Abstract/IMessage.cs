@@ -28,7 +28,7 @@ public interface IMessage
     /// <summary>
     /// Message metadata headers (AMQP headers table).
     /// </summary>
-    IReadOnlyDictionary<string, object?> Headers { get; }
+    IReadOnlyDictionary<string, string?> Headers { get; }
 
     /// <summary>
     /// The number of times the message was resent

@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{DA9B3F
 		logo.png = logo.png
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotRabbit.IntegrationTests", "tests\DotRabbit.IntegrationTests\DotRabbit.IntegrationTests.csproj", "{17798237-1A5B-4BE4-A028-28A30783793C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{32A2146C-9CB0-4A3C-A552-0207308B78F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32A2146C-9CB0-4A3C-A552-0207308B78F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32A2146C-9CB0-4A3C-A552-0207308B78F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17798237-1A5B-4BE4-A028-28A30783793C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17798237-1A5B-4BE4-A028-28A30783793C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17798237-1A5B-4BE4-A028-28A30783793C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17798237-1A5B-4BE4-A028-28A30783793C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -47,6 +53,7 @@ Global
 		{484874B4-9597-4717-AEE9-1D64FBCEDFCC} = {A2D3A09F-74E0-4BA3-B705-5DEE3A5015E6}
 		{32A2146C-9CB0-4A3C-A552-0207308B78F7} = {796338B7-308C-4958-9B57-ACDCF0BA89D1}
 		{DA9B3FE0-4499-4AC5-B07A-67FABF488896} = {F993FCDA-486D-4A4B-8C38-614657060FA8}
+		{17798237-1A5B-4BE4-A028-28A30783793C} = {796338B7-308C-4958-9B57-ACDCF0BA89D1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D604693B-00AB-47B5-A434-7A3A8A019CFB}
