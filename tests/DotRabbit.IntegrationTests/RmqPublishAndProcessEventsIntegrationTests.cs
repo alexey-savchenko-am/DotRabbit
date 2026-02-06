@@ -46,7 +46,7 @@ public class RmqPublishAndProcessEventsIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task PublishMultipleEventsToRmq_ProcessSuccesfully_WhenEventIsCorrect()
+    public async Task PublishMultipleEventsToRmq_ProcessSuccesfully_WhenEventsAreCorrect()
     {
         var eventCount = 10_000;
         var counter = _server.Services.GetRequiredService<EventProcessingCounter>();
