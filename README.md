@@ -1,9 +1,10 @@
 # DotRabbit
 
 <a href="https://github.com/alexey-savchenko-am/DotRabbit">
-  <img src="docs/assets/logo-lg.png" width="200" align="right" />
+  <img src="docs/assets/logo-lg.png" width="250" align="right" />
 </a>
 
+<br/>
 <br/>
 
 **DotRabbit** is a fast, event-driven RabbitMQ client for .NET.
