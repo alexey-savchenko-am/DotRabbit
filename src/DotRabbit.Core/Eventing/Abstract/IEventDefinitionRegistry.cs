@@ -8,6 +8,8 @@ public interface IEventDefinitionRegistry
 
     EventDefinition Register(Type eventType, DomainDefinition domain);
 
+    DomainDefinition? GetDomainByEventType(Type eventType);
+
     IReadOnlyCollection<EventDefinition> GetAllByDomain(DomainDefinition domain);
 
     IReadOnlyCollection<EventDefinition> GetAll();

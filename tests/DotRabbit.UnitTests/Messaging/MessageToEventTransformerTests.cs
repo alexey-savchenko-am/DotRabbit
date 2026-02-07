@@ -33,8 +33,8 @@ public class MessageToEventTransformerTests
         var msg = Message.CreateIncoming(
            deliveryStatusProducer: null!,
            deliveryTag: _fixture.Create<ulong>(),
-           exchange: RmqTopologyResolver.ResolveExchange(_serviceInfo.GetInfo(), domain),
-           routingKey: RmqTopologyResolver.ResolveRoutingKey<UserCreatedTestEvent>(),
+           exchange: _topologyResolver.ResolveExchange(domain),
+           routingKey: _topologyResolver.ResolveRoutingKey<UserCreatedTestEvent>(),
            body: Encoding.UTF8.GetBytes(eventJson),
            headers: headers!);
 

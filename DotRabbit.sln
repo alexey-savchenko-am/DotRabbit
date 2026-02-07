@@ -13,14 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotRabbit.UnitTests", "test
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A2D3A09F-74E0-4BA3-B705-5DEE3A5015E6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{F993FCDA-486D-4A4B-8C38-614657060FA8}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{DA9B3FE0-4499-4AC5-B07A-67FABF488896}"
-	ProjectSection(SolutionItems) = preProject
-		logo.png = logo.png
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotRabbit.IntegrationTests", "tests\DotRabbit.IntegrationTests\DotRabbit.IntegrationTests.csproj", "{17798237-1A5B-4BE4-A028-28A30783793C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotRabbit.IntegrationTests", "tests\DotRabbit.IntegrationTests\DotRabbit.IntegrationTests.csproj", "{17798237-1A5B-4BE4-A028-28A30783793C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,7 +45,6 @@ Global
 		{AED199F0-CF05-47C5-B3E8-AF383586D49D} = {A2D3A09F-74E0-4BA3-B705-5DEE3A5015E6}
 		{484874B4-9597-4717-AEE9-1D64FBCEDFCC} = {A2D3A09F-74E0-4BA3-B705-5DEE3A5015E6}
 		{32A2146C-9CB0-4A3C-A552-0207308B78F7} = {796338B7-308C-4958-9B57-ACDCF0BA89D1}
-		{DA9B3FE0-4499-4AC5-B07A-67FABF488896} = {F993FCDA-486D-4A4B-8C38-614657060FA8}
 		{17798237-1A5B-4BE4-A028-28A30783793C} = {796338B7-308C-4958-9B57-ACDCF0BA89D1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

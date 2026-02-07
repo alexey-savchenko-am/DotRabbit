@@ -46,6 +46,11 @@ internal sealed class EventDefinitionRegistry : IEventDefinitionRegistry
         return eventDefinition;
     }
 
+    public DomainDefinition? GetDomainByEventType(Type eventType)
+    {
+        return GetAll().SingleOrDefault(ed => ed.Type == eventType)?.Domain;
+    }
+
     public IReadOnlyCollection<EventDefinition> GetAllByDomain(DomainDefinition domain)
     {
         if (domain is null)
@@ -65,6 +70,7 @@ internal sealed class EventDefinitionRegistry : IEventDefinitionRegistry
             .ToList()
             .AsReadOnly();
     }
+
 
     public EventDefinition GetByNameWithinDomain(
         string eventName,

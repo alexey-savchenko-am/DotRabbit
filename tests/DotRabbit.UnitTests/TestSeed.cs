@@ -6,6 +6,7 @@ using DotRabbit.Core.Settings;
 using DotRabbit.Core.Settings.Abstract;
 using DotRabbit.Core.Settings.Entities;
 using DotRabbit.Core.Settings.Serialize;
+using DotRabbit.Core.Settings.Topology;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace DotRabbit.UnitTests;
@@ -18,6 +19,7 @@ public abstract class TestSeed
     protected readonly IEventSerializer _eventSerializer;
     protected readonly IMessageToEventTransformer _messageToEventTransformer;
     protected readonly IEventDefinitionRegistry _eventDefinitionRegistry;
+    protected readonly ITopologyResolver _topologyResolver;
     
 
     protected TestSeed()
@@ -28,7 +30,7 @@ public abstract class TestSeed
         _eventContainerFactory = new EventContainerFactory();
         _eventContainerFactory.Register(typeof(UserCreatedTestEvent));
         _eventSerializer = new JsonBasedEventSerializer();
-       
+        _topologyResolver = new TopologyResolver(_serviceInfo, _eventDefinitionRegistry);
 
         _messageToEventTransformer = new MessageToEventTransformer(
                 NullLogger<MessageToEventTransformer>.Instance,

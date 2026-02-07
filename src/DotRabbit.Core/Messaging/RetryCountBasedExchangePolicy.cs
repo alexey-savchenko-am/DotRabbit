@@ -22,17 +22,17 @@ internal class RetryCountBasedExchangePolicy
     public int MaxRetryCount { get; }
 
     private readonly ILogger<RetryCountBasedExchangePolicy> _logger;
-    private readonly IServiceInfo _serviceInfo;
+    private readonly ITopologyResolver _topologyResolver;
     private readonly IMessageSender _messageSender;
 
     public RetryCountBasedExchangePolicy(
         ILogger<RetryCountBasedExchangePolicy> logger,
-        IServiceInfo serviceInfo,
+        ITopologyResolver topologyResolver,
         IMessageSender messageSender,
         int maxRetryCount = 5)
     {
         _logger = logger;
-        _serviceInfo = serviceInfo;
+        _topologyResolver = topologyResolver;
         _messageSender = messageSender;
         MaxRetryCount = maxRetryCount;
     }
@@ -55,13 +55,11 @@ internal class RetryCountBasedExchangePolicy
 
     private IMessage BuildOutgoingMessage(IMessage msg, bool isRetry)
     {
-        var service = _serviceInfo.GetInfo();
-
         var domain = new DomainDefinition(msg.GetRequiredHeader(MessageHeaders.Domain));
 
         var exchange = isRetry 
-            ? RmqTopologyResolver.ResolveRetryExchange(service, domain) 
-            : RmqTopologyResolver.ResolveDlxExchange(service, domain);
+            ? _topologyResolver.ResolveRetryExchange(domain) 
+            : _topologyResolver.ResolveDlxExchange(domain);
 
         var headers = new Dictionary<string, string?>
         {

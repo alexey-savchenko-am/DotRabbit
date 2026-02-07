@@ -49,16 +49,17 @@ public static class TransportServiceCollectionExtensions
         services.TryAddSingleton<ITopologyStrategy, RmqEventPerQueueTopologyStrategy>();
         services.TryAddSingleton<IEventSerializer, JsonBasedEventSerializer>();
         services.AddSingleton<RmqTopologyManager>();
+        services.AddSingleton<ITopologyResolver, TopologyResolver>();
 
         services.TryAddSingleton<IMessageRetryPolicy>(provider =>
         {
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
-            var serviceInfo = provider.GetRequiredService<IServiceInfo>();
             var sender = provider.GetRequiredService<IMessageSender>();
+            var topologyResolver = provider.GetRequiredService<ITopologyResolver>();
 
             return new RetryCountBasedExchangePolicy(
                 logger: loggerFactory.CreateLogger<RetryCountBasedExchangePolicy>(),
-                serviceInfo,
+                topologyResolver,
                 sender,
                 maxRetryCount: 5);
         });

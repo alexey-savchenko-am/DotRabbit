@@ -6,15 +6,15 @@ namespace DotRabbit.Core.Settings.Topology;
 internal class RmqEventPerQueueTopologyStrategy
     : ITopologyStrategy
 {
-    private readonly IServiceInfo _serviceInfo;
     private readonly RmqTopologyManager _topologyManager;
+    private readonly ITopologyResolver _topologyResolver;
 
     public RmqEventPerQueueTopologyStrategy(
-        IServiceInfo serviceInfo,
-        RmqTopologyManager topologyManager)
+        RmqTopologyManager topologyManager,
+        ITopologyResolver topologyResolver)
     {
-        _serviceInfo = serviceInfo;
         _topologyManager = topologyManager;
+        _topologyResolver = topologyResolver;
     }
 
     /*
@@ -41,15 +41,14 @@ internal class RmqEventPerQueueTopologyStrategy
         DomainDefinition domain,
         IReadOnlyCollection<EventDefinition> events)
     {
-        var service = _serviceInfo.GetInfo();
         var result = new List<QueueDefinition>();
 
         // ex. user.users.topic
-        var exchange = RmqTopologyResolver.ResolveExchange(service, domain);
+        var exchange = _topologyResolver.ResolveExchange(domain);
         // ex. user.users.retry
-        var retryExchange = RmqTopologyResolver.ResolveRetryExchange(service, domain);
+        var retryExchange = _topologyResolver.ResolveRetryExchange(domain);
         // ex. user.users.dlx
-        var dlx = RmqTopologyResolver.ResolveDlxExchange(service, domain);
+        var dlx = _topologyResolver.ResolveDlxExchange(domain);
 
         await _topologyManager.DeclareExchangeAsync(exchange, ExchangeType.Topic);
         await _topologyManager.DeclareExchangeAsync(retryExchange, ExchangeType.Direct);
@@ -58,11 +57,11 @@ internal class RmqEventPerQueueTopologyStrategy
         foreach (var e in events)
         {
             // ex. user.users.user-created.q
-            var queue = RmqTopologyResolver.ResolveQueue(service, domain, e);
+            var queue = _topologyResolver.ResolveQueue(domain, e);
             // ex. user.users.user-created.retry
-            var retryQueue = RmqTopologyResolver.ResolveRetryQueue(service, domain, e);
+            var retryQueue = _topologyResolver.ResolveRetryQueue(domain, e);
             // ex. user.users.user-created.dlq
-            var dlq = RmqTopologyResolver.ResolveDeadQueue(service, domain, e);
+            var dlq = _topologyResolver.ResolveDlqQueue(domain, e);
 
             // MAIN QUEUE
             await _topologyManager.DeclareQueueAsync(queue, new QueueOptions
