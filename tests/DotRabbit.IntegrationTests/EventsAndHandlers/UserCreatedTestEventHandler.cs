@@ -1,6 +1,6 @@
 ﻿using DotRabbit.Core.Eventing.Abstract;
 
-namespace DotRabbit.IntegrationTests;
+namespace DotRabbit.IntegrationTests.EventsAndHandlers;
 
 internal class UserCreatedTestEventHandler : IEventHandler<UserCreatedTestEvent>
 {

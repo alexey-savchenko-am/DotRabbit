@@ -31,7 +31,6 @@ public class MessageToEventTransformerTests
         };
 
         var msg = Message.CreateIncoming(
-           deliveryStatusProducer: null!,
            deliveryTag: _fixture.Create<ulong>(),
            exchange: _topologyResolver.ResolveExchange(domain),
            routingKey: _topologyResolver.ResolveRoutingKey<UserCreatedTestEvent>(),

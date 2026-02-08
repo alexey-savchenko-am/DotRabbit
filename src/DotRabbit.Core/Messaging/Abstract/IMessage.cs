@@ -38,8 +38,4 @@ public interface IMessage
     string GetRequiredHeader(string headerKey);
 
     string? GetHeader(string headerKey);
-
-    ValueTask AckAsync();
-
-    ValueTask NackAsync();
 }

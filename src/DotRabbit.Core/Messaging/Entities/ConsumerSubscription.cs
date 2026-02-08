@@ -1,5 +1,4 @@
-﻿using DotRabbit.Core.Messaging.Abstract;
-using DotRabbit.Core.Settings.Entities;
+﻿using DotRabbit.Core.Settings.Entities;
 using RabbitMQ.Client;
 
 namespace DotRabbit.Core.Messaging.Entities;
@@ -12,7 +11,6 @@ public sealed class ConsumerSubscription
     public QueueDefinition Queue { get; }
     public IChannel Channel { get; }
     public string Tag { get; }
-    private IAckNackDispatcher AckNackDispatcher { get; }
     public bool IsFaulted { get; private set; }
 
     public bool IsHealthy => Channel.IsOpen && !IsFaulted;
@@ -20,12 +18,10 @@ public sealed class ConsumerSubscription
     public ConsumerSubscription(
         QueueDefinition queue,
         IChannel channel,
-        IAckNackDispatcher ackNackDispatcher,
         string tag)
     {
         Queue = queue;
         Channel = channel;
-        AckNackDispatcher = ackNackDispatcher;
         Tag = tag;
     }
 
@@ -67,8 +63,6 @@ public sealed class ConsumerSubscription
         }
 
         await Channel.DisposeAsync();
-        // wait until dispatcher is stopped
-        //await AckNackDispatcher.StopAsync();
     }
 
     public async ValueTask DisposeAsync()

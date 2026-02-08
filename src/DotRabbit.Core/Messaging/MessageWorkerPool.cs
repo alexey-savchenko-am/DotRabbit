@@ -145,8 +145,6 @@ internal sealed class MessageWorkerPool
 
                     await _eventProcessorInvoker.InvokeAsync(@event).ConfigureAwait(false);
                     
-                    await msg.AckAsync().ConfigureAwait(false);
-
                     _logger.LogDebug("Worker {WorkerId} ACK message {Tag}", workerId, msg.DeliveryTag);
                 }
                 catch (Exception ex)

@@ -1,7 +1,7 @@
 ﻿using DotRabbit.Core.Eventing;
 using DotRabbit.Core.Eventing.Abstract;
 
-namespace DotRabbit.IntegrationTests;
+namespace DotRabbit.IntegrationTests.EventsAndHandlers;
 
 [EventName("user-created")]
 public class UserCreatedTestEvent : IEvent

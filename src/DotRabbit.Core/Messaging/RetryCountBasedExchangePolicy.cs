@@ -44,7 +44,6 @@ internal class RetryCountBasedExchangePolicy
             var outgoingMsg = BuildOutgoingMessage(msg, isRetry: msg.RetryCount < MaxRetryCount);
 
             await _messageSender.SendAsync(outgoingMsg, ct).ConfigureAwait(false);
-            await msg.AckAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {

@@ -23,13 +23,11 @@ internal sealed record Message
 
     //Lazy body content 
     private string? _bodyStr;
-    private readonly ChannelWriter<DeliveryStatus> _deliveryStatusProducer;
 
     public string BodyStr => _bodyStr ??= Encoding.UTF8.GetString(Body.Span);
 
     private Message(
         MessageType type,
-        ChannelWriter<DeliveryStatus> deliveryStatusProducer,
         ulong deliveryTag,
         string exchange,
         string routingKey,
@@ -38,7 +36,6 @@ internal sealed record Message
     {
         Status = DeliveryStatusCode.Delivered;
         Type = type;
-        _deliveryStatusProducer = deliveryStatusProducer;
         DeliveryTag = deliveryTag;
         Exchange = exchange;
         RoutingKey = routingKey;
@@ -47,7 +44,6 @@ internal sealed record Message
     }
 
     public static Message CreateIncoming(
-        ChannelWriter<DeliveryStatus> deliveryStatusProducer,
         ulong deliveryTag,
         string exchange,
         string routingKey,
@@ -60,7 +56,6 @@ internal sealed record Message
 
         return new Message(
             MessageType.Incoming,
-            deliveryStatusProducer,
             deliveryTag,
             exchange,
             routingKey,
@@ -81,26 +76,12 @@ internal sealed record Message
 
         return new Message(
             MessageType.Outgoing,
-            null!,
             0,
             exchange,
             routingKey,
             body,
             headers ?? EmptyHeaders.Instance
         );
-    }
-
-
-    public ValueTask AckAsync()
-    {
-        Status = DeliveryStatusCode.Ack;
-        return _deliveryStatusProducer.WriteAsync(new DeliveryStatus(Status, DeliveryTag));
-    }
-
-    public ValueTask NackAsync()
-    {
-        Status = DeliveryStatusCode.Nack;
-        return _deliveryStatusProducer.WriteAsync(new DeliveryStatus(Status, DeliveryTag));
     }
 
     public string GetRequiredHeader(string headerKey)

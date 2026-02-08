@@ -1,10 +1,8 @@
-﻿using DotRabbit.Core.Messaging.Entities;
-using DotRabbit.Core.Settings.Entities;
+﻿using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
-using System.Threading.Channels;
 
 namespace DotRabbit.Core.Messaging;
 
@@ -13,7 +11,6 @@ internal sealed class RmqMessageConsumer
 {
     private readonly DomainDefinition _domain;
     private readonly MessageWorkerPool _workerPool;
-    private readonly ChannelWriter<DeliveryStatus> _deliveryStatusProducer;
     private readonly ILogger _logger;
     private string? _consumerTag;
     private int _signaled;
@@ -23,13 +20,11 @@ internal sealed class RmqMessageConsumer
         ILogger<RmqMessageConsumer> logger,
         DomainDefinition domain,
         MessageWorkerPool workerPool,
-        ChannelWriter<DeliveryStatus> deliveryStatusProducer,
         IChannel channel) 
         : base(channel)
     {
         _domain = domain;
         _workerPool = workerPool;
-        _deliveryStatusProducer = deliveryStatusProducer;
         _logger = logger;
     }
 
@@ -49,7 +44,6 @@ internal sealed class RmqMessageConsumer
                 .ToDictionary(k => k.Key, v => HeaderValueToString(v.Value));
 
             var msg = Message.CreateIncoming(
-                _deliveryStatusProducer, 
                 deliveryTag, 
                 exchange, 
                 routingKey, 
@@ -57,14 +51,13 @@ internal sealed class RmqMessageConsumer
                 headers!);
 
             await _workerPool.EnqueueAsync(msg);
+            await Channel.BasicAckAsync(deliveryTag, false, cancellationToken);
         }
         catch(Exception ex)
         {
             _logger.LogError(ex, "An error occurred while processing the message. Message tag {DeliveryTag} is about to REJECT.", deliveryTag);
 
-            await _deliveryStatusProducer.WriteAsync(
-              new DeliveryStatus(DeliveryStatusCode.Reject, deliveryTag), 
-              cancellationToken);
+            await Channel.BasicRejectAsync(deliveryTag, false, cancellationToken);
         }
     }
 
@@ -107,5 +100,4 @@ internal sealed class RmqMessageConsumer
 
         Faulted?.Invoke();
     }
-
 }

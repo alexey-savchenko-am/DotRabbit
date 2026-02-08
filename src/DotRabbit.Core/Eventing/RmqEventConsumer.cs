@@ -9,7 +9,6 @@ using DotRabbit.Core.Settings.Entities;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using System.Collections.Concurrent;
-using System.Threading.Channels;
 
 namespace DotRabbit.Core.Eventing;
 
@@ -120,26 +119,10 @@ internal sealed class RmqEventConsumer
             global: false,
             ct).ConfigureAwait(false);
 
-        var deliveryStatusQueue = Channel.CreateBounded<DeliveryStatus>(
-            new BoundedChannelOptions(_workerPool.BufferSize)
-            {
-                SingleReader = true,
-                SingleWriter = false,
-                FullMode = BoundedChannelFullMode.Wait
-            });
-
-        var ackDispatcher = new AckNackDispatcher(
-            _loggerFactory.CreateLogger<AckNackDispatcher>(),
-            channel,
-            domain,
-            deliveryStatusQueue,
-            ct);
-
         var consumer = new RmqMessageConsumer(
             _loggerFactory.CreateLogger<RmqMessageConsumer>(),
             domain,
             _workerPool,
-            deliveryStatusQueue.Writer,
             channel);
 
         var consumerTag = await channel.BasicConsumeAsync(
@@ -148,12 +131,9 @@ internal sealed class RmqEventConsumer
             consumer,
             ct).ConfigureAwait(false);
 
-        ackDispatcher.Start();
-
         var subscription = new ConsumerSubscription(
             queue, 
             channel, 
-            ackDispatcher, 
             consumerTag);
 
         consumer.Faulted += subscription.MakeFaulted;

@@ -19,7 +19,7 @@ internal sealed class TopologyResolver: ITopologyResolver
 
     #region Exchange
     public string ResolveExchange(DomainDefinition domain) => 
-        $"{_serviceInfo.GetType().Name}.{domain.Name}.topic";
+        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.topic";
 
     public string ResolveExchange<TEvent>() where TEvent : IEvent
     {
@@ -28,19 +28,19 @@ internal sealed class TopologyResolver: ITopologyResolver
         if (eventDef is null)
             throw new InvalidOperationException($"Event defenition for type {typeof(TEvent).Name} not found");
 
-        return $"{_serviceInfo.GetType().Name}.{eventDef.Domain.Name}.topic";
+        return $"{_serviceInfo.GetInfo().Name}.{eventDef.Domain.Name}.topic";
     }
 
     public string ResolveRetryExchange(DomainDefinition domain) =>
-        $"{_serviceInfo.GetType().Name}.{domain.Name}.retry";
+        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.retry";
 
     public string ResolveDlxExchange(DomainDefinition domain) =>
-        $"{_serviceInfo.GetType().Name}.{domain.Name}.dlx";
+        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.dlx";
     #endregion
 
     #region Queue
     public string ResolveQueue(DomainDefinition domain, EventDefinition @event) =>
-        $"{_serviceInfo.GetType().Name}.{domain.Name}.{@event.Name}.q";
+        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.{@event.Name}.q";
 
     public string ResolveQueue<TEvent>() where TEvent : IEvent
     {
@@ -49,14 +49,14 @@ internal sealed class TopologyResolver: ITopologyResolver
         if (eventDef is null)
             throw new InvalidOperationException($"Event defenition for type {typeof(TEvent).Name} not found");
 
-        return $"{_serviceInfo.GetType().Name}.{eventDef.Domain.Name}.{eventDef.Name}.q";
+        return $"{_serviceInfo.GetInfo().Name}.{eventDef.Domain.Name}.{eventDef.Name}.q";
     }
      
     public string ResolveRetryQueue(DomainDefinition domain, EventDefinition @event) =>
-        $"{_serviceInfo.GetType().Name}.{domain.Name}.{@event.Name}.retry";
+        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.{@event.Name}.retry";
 
     public string ResolveDlqQueue(DomainDefinition domain, EventDefinition @event) =>
-        $"{_serviceInfo.GetType().Name}.{domain.Name}.{@event.Name}.dlq";
+        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.{@event.Name}.dlq";
     #endregion
 
     #region RoutingKey

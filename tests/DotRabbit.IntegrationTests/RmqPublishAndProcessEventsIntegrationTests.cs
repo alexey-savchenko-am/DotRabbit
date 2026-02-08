@@ -1,7 +1,9 @@
 ﻿using AutoFixture;
 using DotRabbit.Core.Settings.Entities;
+using DotRabbit.IntegrationTests.EventsAndHandlers;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.Tracing;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -43,6 +45,32 @@ public class RmqPublishAndProcessEventsIntegrationTests : IAsyncLifetime
         @event.Event.Name.Should().Be(userCreatedEvent.Name);
         @event.Event.UserId.Should().Be(userCreatedEvent.UserId);
         @event.Event.CreatedOnUtc.Should().Be(userCreatedEvent.CreatedOnUtc);
+    }
+
+    [Fact]
+    public async Task PublishFailedEventToRmq_TriesToBeProcessed5Times_WhenEventHandlerThrowsException()
+    {
+        const int retryCount = 5;
+
+        var counter = _server.Services.GetRequiredService<EventProcessingCounter>();
+        counter.Reset(retryCount);
+
+        var generation = counter.Generation;
+
+        await _server.EventPublisher.PublishAsync(
+            new DomainDefinition("users"),
+            _server.Fixture.Create<UserUpdatedFailedEvent>()
+        );
+
+        var elapsedMs = await counter.WaitAsync(TimeSpan.FromSeconds(60));
+
+        counter.Remaining.Should().Be(0);
+
+        _output.WriteLine(
+            "Message processing repeated {0} times in {1}ms",
+            retryCount,
+            elapsedMs
+        );
     }
 
     [Fact]

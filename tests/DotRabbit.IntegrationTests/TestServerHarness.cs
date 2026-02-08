@@ -3,6 +3,7 @@ using AutoFixture;
 using DotRabbit.Core.Configuration.Extensions;
 using DotRabbit.Core.Eventing.Abstract;
 using DotRabbit.Core.Settings.Entities;
+using DotRabbit.IntegrationTests.EventsAndHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -34,10 +35,10 @@ public sealed class TestServerHarness : IAsyncDisposable
                 logging.ClearProviders();
 
                 logging.AddProvider(
-                    new XunitLoggerProvider(_output, LogLevel.Warning)
+                    new XunitLoggerProvider(_output, LogLevel.Debug)
                 );
 
-                logging.SetMinimumLevel(LogLevel.Warning);
+                logging.SetMinimumLevel(LogLevel.Debug);
             })
             .ConfigureServices(services =>
             {
@@ -47,6 +48,7 @@ public sealed class TestServerHarness : IAsyncDisposable
                 services.AddSingleton<EventProcessingCounter>();
 
                 services.AddScoped<UserCreatedTestEventHandler>();
+                services.AddScoped<UserUpdatedFailedEventHandler>();
 
                 services.AddRmqTransport(
                     serviceName: "TestService", 
@@ -56,9 +58,10 @@ public sealed class TestServerHarness : IAsyncDisposable
                 services.AddEventSubscriber(
                     domain: new DomainDefinition("users"),
                     processor =>
-                        processor.SubscribeOn<UserCreatedTestEvent, UserCreatedTestEventHandler>()
+                        processor
+                            .SubscribeOn<UserCreatedTestEvent, UserCreatedTestEventHandler>()
+                            .SubscribeOn<UserUpdatedFailedEvent, UserUpdatedFailedEventHandler>()
                 );
-
             })
             .Build();
 
@@ -83,7 +86,6 @@ public sealed class TestServerHarness : IAsyncDisposable
         await StopAsync();
     }
 }
-
 
 public sealed class XunitLoggerProvider : ILoggerProvider
 {
