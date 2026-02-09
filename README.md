@@ -65,8 +65,8 @@ services.AddScoped<UserCreatedEventHandler>();
 
 ### Transport Registration
 
-Register the RMQ transport within the `Startup` class to configure the consumer and producer for the bus.
-Use the configuration builder to set up the connection to the RMQ endpoint.
+Register the RMQ transport within the `Startup` class to configure the consumer and producer for the bus. 
+Use the configuration builder to set up the connection to the RMQ endpoint. 
 You can use `RmqConfigurationBuilder` for easier configuration.
 Alternatively, you can manually configure the `RmqConnectionConfiguration` object via the `configBuilder` parameter.
 
@@ -84,7 +84,7 @@ services.AddRmqTransport(
  ### Event Subscriber Registration
 
 Use the event subscriber registration to bind event handlers to a specific domain.
-In this configuration, the **domain acts as an RMQ exchange**.  
+In this configuration, the **domain acts as an RMQ exchange**. 
 All events published within the same domain will be routed through this exchange and processed by the subscribed handlers.
 
 ```csharp
