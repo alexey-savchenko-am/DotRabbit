@@ -21,5 +21,5 @@ DotRabbit focuses on a clean developer experience while keeping message publishi
 
 ## Architecture
 <div align="center">
-    <img src="docs/assets/architecture-dark.png" width="70%"/>
+    <img src="docs/assets/architecture.jpg" width="70%"/>
 </div>
