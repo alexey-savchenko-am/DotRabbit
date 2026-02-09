@@ -20,6 +20,9 @@ DotRabbit focuses on a clean developer experience while keeping message publishi
     - [Event Publishing](#event-publishing)
 
 ## Architecture
+
 <div align="center">
-    <img src="docs/assets/architecture.jpg" width="70%"/>
+  <img src="docs/assets/architecture.jpg#gh-light-mode-only" alt="Architecture diagram">
+  <img src="docs/assets/architecture-dark.png#gh-dark-mode-only" alt="Architecture diagram">
 </div>
+
