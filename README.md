@@ -11,6 +11,7 @@ It is designed to be simple to use, easy to configure, and efficient under load.
 DotRabbit focuses on a clean developer experience while keeping message publishing and consumption lightweight and predictable.
 
 ## Table of contents
+- [Installation](#installation)
 - [Getting Started](#getting-started)
     - [Event Definition](#event-definition)
     - [Event Handler Definition](#event-handler-definition)
@@ -19,6 +20,15 @@ DotRabbit focuses on a clean developer experience while keeping message publishi
     - [Event Publishing](#event-publishing)
 - [Architecture](#architecture)
 
+## Installation
+Install NuGet package via NuGet.org
+
+```sh
+$ dotnet add package DotRabbit
+```
+```powershell
+PS> Install-Package DotRabbit
+```
 
 ## Getting Started
 ### Event Definition
