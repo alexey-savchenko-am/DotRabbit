@@ -10,13 +10,16 @@
 It is designed to be simple to use, easy to configure, and efficient under load. 
 DotRabbit focuses on a clean developer experience while keeping message publishing and consumption lightweight and predictable.
 
+## Table of contents
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+    - [Event Definition](#event-definition)
+    - [Event Handler Definition](#event-handler-definition)
+    - [Transport Registration](#transport-registration)
+    - [Setting Event Listener](#setting-event-listener)
+    - [Event Publishing](#event-publishing)
 
-
-
-
-<br clear="right" />
-
-## Features
-- Simple API
-- High-throughput consumers
-- Explicit acknowledgements
+## Architecture
+<div align="center">
+    <img src="docs/assets/architecture-dark.jpg" width="70%"/>
+</div>
