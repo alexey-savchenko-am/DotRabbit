@@ -22,7 +22,7 @@ DotRabbit focuses on a clean developer experience while keeping message publishi
 ## Architecture
 
 <div align="center">
-  <img src="docs/assets/architecture.jpg#gh-light-mode-only" alt="Architecture diagram"  width="40%">
-  <img src="docs/assets/architecture-dark.png#gh-dark-mode-only" alt="Architecture diagram"  width="40%">
+  <img src="docs/assets/architecture.jpg#gh-light-mode-only" alt="Architecture diagram"  width="60%">
+  <img src="docs/assets/architecture-dark.png#gh-dark-mode-only" alt="Architecture diagram"  width="60%">
 </div>
 
