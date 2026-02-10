@@ -113,8 +113,8 @@ services.AddEventSubscriber(
 ## Architecture
 
 <div align="center">
-  <img src="docs/assets/architecture.jpg#gh-light-mode-only" alt="Architecture diagram"  width="60%">
-  <img src="docs/assets/architecture-dark.png#gh-dark-mode-only" alt="Architecture diagram"  width="60%">
+  <img src="docs/assets/architecture.jpg#gh-light-mode-only" alt="Architecture diagram" >
+  <img src="docs/assets/architecture-dark.png#gh-dark-mode-only" alt="Architecture diagram"  >
 </div>
 
 ## Topology
