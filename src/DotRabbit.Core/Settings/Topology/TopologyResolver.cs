@@ -18,9 +18,16 @@ internal sealed class TopologyResolver: ITopologyResolver
     }
 
     #region Exchange
-    public string ResolveExchange(DomainDefinition domain) => 
-        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.topic";
 
+    /// <summary>
+    /// ex: orders.topic
+    /// </summary>
+    public string ResolveExchange(DomainDefinition domain) => 
+        $"{domain.Name}.topic";
+
+    /// <summary>
+    /// ex: orders.topic
+    /// </summary>
     public string ResolveExchange<TEvent>() where TEvent : IEvent
     {
         var eventDef = GetEventDefinition(typeof(TEvent));
@@ -28,20 +35,32 @@ internal sealed class TopologyResolver: ITopologyResolver
         if (eventDef is null)
             throw new InvalidOperationException($"Event defenition for type {typeof(TEvent).Name} not found");
 
-        return $"{_serviceInfo.GetInfo().Name}.{eventDef.Domain.Name}.topic";
+        return $"{eventDef.Domain.Name}.topic";
     }
 
+    /// <summary>
+    /// ex: orders.retry
+    /// </summary>
     public string ResolveRetryExchange(DomainDefinition domain) =>
-        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.retry";
+        $"{domain.Name}.retry";
 
+    /// <summary>
+    /// ex: orders.retry
+    /// </summary>
     public string ResolveDlxExchange(DomainDefinition domain) =>
-        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.dlx";
+        $"{domain.Name}.dlx";
     #endregion
 
+    /// <summary>
+    /// ex: orderservice.orders.q
+    /// </summary>
     #region Queue
-    public string ResolveQueue(DomainDefinition domain, EventDefinition @event) =>
-        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.{@event.Name}.q";
+    public string ResolveQueue(DomainDefinition domain) =>
+        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.q";
 
+    /// <summary>
+    /// ex: orderservice.orders.q
+    /// </summary>
     public string ResolveQueue<TEvent>() where TEvent : IEvent
     {
         var eventDef = GetEventDefinition(typeof(TEvent));
@@ -49,14 +68,20 @@ internal sealed class TopologyResolver: ITopologyResolver
         if (eventDef is null)
             throw new InvalidOperationException($"Event defenition for type {typeof(TEvent).Name} not found");
 
-        return $"{_serviceInfo.GetInfo().Name}.{eventDef.Domain.Name}.{eventDef.Name}.q";
+        return $"{_serviceInfo.GetInfo().Name}.{eventDef.Domain.Name}.q";
     }
-     
-    public string ResolveRetryQueue(DomainDefinition domain, EventDefinition @event) =>
-        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.{@event.Name}.retry";
 
-    public string ResolveDlqQueue(DomainDefinition domain, EventDefinition @event) =>
-        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.{@event.Name}.dlq";
+    /// <summary>
+    /// ex: orderservice.orders.retry
+    /// </summary>
+    public string ResolveRetryQueue(DomainDefinition domain) =>
+        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.retry";
+
+    /// <summary>
+    /// ex: orderservice.orders.dlq
+    /// </summary>
+    public string ResolveDlqQueue(DomainDefinition domain) =>
+        $"{_serviceInfo.GetInfo().Name}.{domain.Name}.dlq";
     #endregion
 
     #region RoutingKey

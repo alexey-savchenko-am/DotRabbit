@@ -15,6 +15,7 @@ public abstract class TestSeed
 {
     public readonly Fixture _fixture = new ();
     protected readonly IServiceInfo _serviceInfo;
+    protected DomainDefinition _domain;
     protected readonly IEventContainerFactory _eventContainerFactory;
     protected readonly IEventSerializer _eventSerializer;
     protected readonly IMessageToEventTransformer _messageToEventTransformer;
@@ -25,10 +26,14 @@ public abstract class TestSeed
     protected TestSeed()
     {
         _serviceInfo = new ServiceInfo("TestService");
+        _domain = new DomainDefinition("users");
+
         _eventDefinitionRegistry = new EventDefinitionRegistry();
-        _eventDefinitionRegistry.Register(typeof(UserCreatedTestEvent), new DomainDefinition("users"));
+        _eventDefinitionRegistry.Register(typeof(UserCreatedTestEvent), _domain);
+       
         _eventContainerFactory = new EventContainerFactory();
         _eventContainerFactory.Register(typeof(UserCreatedTestEvent));
+
         _eventSerializer = new JsonBasedEventSerializer();
         _topologyResolver = new TopologyResolver(_serviceInfo, _eventDefinitionRegistry);
 

@@ -4,14 +4,15 @@ using DotRabbit.Core.Configuration.Extensions;
 using DotRabbit.Core.Eventing.Abstract;
 using DotRabbit.Core.Settings.Entities;
 using DotRabbit.IntegrationTests.EventsAndHandlers;
+using DotRabbit.IntegrationTests.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace DotRabbit.IntegrationTests;
+namespace DotRabbit.IntegrationTests.Fixtures;
 
-public sealed class TestServerHarness : IAsyncDisposable
+public sealed class TestServer : IAsyncDisposable
 {
     private IHost? _host;
     public IServiceProvider Services =>
@@ -22,7 +23,7 @@ public sealed class TestServerHarness : IAsyncDisposable
     public EventProcessingSignal<IEventContainer<UserCreatedTestEvent>> UserCreatedEventSignal { get; private set; } = null!;
     private readonly ITestOutputHelper _output;
 
-    public TestServerHarness(ITestOutputHelper output)
+    public TestServer(ITestOutputHelper output)
     {
         _output = output;
     }
@@ -51,7 +52,7 @@ public sealed class TestServerHarness : IAsyncDisposable
                 services.AddScoped<UserUpdatedFailedEventHandler>();
 
                 services.AddRmqTransport(
-                    serviceName: "TestService", 
+                    serviceName: "TestService",
                     config => config.FromConnectionString(rmqConnectionString)
                 );
 
@@ -65,7 +66,7 @@ public sealed class TestServerHarness : IAsyncDisposable
             })
             .Build();
 
-        
+
         await _host.StartAsync();
 
         EventPublisher = _host.Services.GetRequiredService<IEventPublisher>();

@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using DotRabbit.IntegrationTests.Fixtures;
+using FluentAssertions;
 using RabbitMQ.Client;
 using Xunit;
 

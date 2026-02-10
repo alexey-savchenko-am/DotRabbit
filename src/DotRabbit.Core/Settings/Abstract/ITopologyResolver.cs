@@ -9,10 +9,10 @@ public interface ITopologyResolver
     string ResolveExchange<TEvent>() where TEvent : IEvent;
     string ResolveRetryExchange(DomainDefinition domain);
     string ResolveDlxExchange(DomainDefinition domain);
-    string ResolveQueue(DomainDefinition domain, EventDefinition @event);
+    string ResolveQueue(DomainDefinition domain);
     string ResolveQueue<TEvent>() where TEvent : IEvent;
-    string ResolveRetryQueue(DomainDefinition domain, EventDefinition @event);
-    string ResolveDlqQueue(DomainDefinition domain, EventDefinition @event);
+    string ResolveRetryQueue(DomainDefinition domain);
+    string ResolveDlqQueue(DomainDefinition domain);
     string ResolveRoutingKey<TEvent>() where TEvent : IEvent;
     string ResolveRoutingKey<TEvent>(DomainDefinition domain) where TEvent : IEvent;
 

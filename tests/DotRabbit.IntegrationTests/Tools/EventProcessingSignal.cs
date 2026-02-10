@@ -1,5 +1,4 @@
-﻿
-namespace DotRabbit.IntegrationTests;
+﻿namespace DotRabbit.IntegrationTests.Tools;
 
 public sealed class EventProcessingSignal<TEvent>
 {

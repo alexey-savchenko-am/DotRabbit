@@ -1,4 +1,5 @@
 ﻿using DotRabbit.Core.Eventing.Abstract;
+using DotRabbit.IntegrationTests.Tools;
 
 namespace DotRabbit.IntegrationTests.EventsAndHandlers;
 
@@ -14,7 +15,7 @@ internal class UserUpdatedFailedEventHandler
 
     public async Task HandleAsync(IEventContainer<UserUpdatedFailedEvent> @event)
     {
-        _counter.Signal();
+        _counter.Signal(_counter.Generation);
         throw new InvalidOperationException("Failed to process event at this point 🥺🥺🥺");
     }
 }

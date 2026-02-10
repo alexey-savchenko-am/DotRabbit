@@ -1,6 +1,8 @@
 ﻿using AutoFixture;
 using DotRabbit.Core.Settings.Entities;
 using DotRabbit.IntegrationTests.EventsAndHandlers;
+using DotRabbit.IntegrationTests.Fixtures;
+using DotRabbit.IntegrationTests.Tools;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.Tracing;
@@ -12,12 +14,12 @@ namespace DotRabbit.IntegrationTests;
 public class RmqPublishAndProcessEventsIntegrationTests : IAsyncLifetime
 {
     private readonly RabbitMqFixture _rabbit = new();
-    private readonly TestServerHarness _server;
+    private readonly TestServer _server;
     private readonly ITestOutputHelper _output;
 
     public RmqPublishAndProcessEventsIntegrationTests(ITestOutputHelper output)
     {
-        _server = new TestServerHarness(output);
+        _server = new TestServer(output);
         _output = output;
     }
 

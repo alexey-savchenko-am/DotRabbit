@@ -1,10 +1,11 @@
 ﻿using DotRabbit.Core.Connection;
+using DotRabbit.Core.Settings.Abstract;
 using DotRabbit.Core.Settings.Entities;
 using RabbitMQ.Client;
 
 namespace DotRabbit.Core.Settings.Topology;
 
-internal sealed class RmqTopologyManager
+internal sealed class RmqTopologyManager: IRmqTopologyManager
 {
     private readonly RmqChannelPool _channelPool;
 

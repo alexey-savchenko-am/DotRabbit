@@ -6,7 +6,7 @@ public record Service
 
     public Service(string name)
     {
-        Name = name.ToDottedNotation();
+        Name = name.ToKebabNotation();
     }
 }
 

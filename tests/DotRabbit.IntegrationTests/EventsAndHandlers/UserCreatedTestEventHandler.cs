@@ -1,4 +1,5 @@
 ﻿using DotRabbit.Core.Eventing.Abstract;
+using DotRabbit.IntegrationTests.Tools;
 
 namespace DotRabbit.IntegrationTests.EventsAndHandlers;
 
@@ -19,7 +20,7 @@ internal class UserCreatedTestEventHandler : IEventHandler<UserCreatedTestEvent>
     {
         Console.WriteLine("Done!");
         _signal.Signal(@event);
-        _counter.Signal();
+        _counter.Signal(_counter.Generation);
         return Task.CompletedTask;
     }
 }

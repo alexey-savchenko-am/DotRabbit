@@ -46,9 +46,9 @@ public static class TransportServiceCollectionExtensions
         services.TryAddSingleton<IMessageToEventTransformer, MessageToEventTransformer>();
         services.TryAddSingleton<IEventProcessorInvoker, EventProcessorInvoker>();
      
-        services.TryAddSingleton<ITopologyStrategy, RmqEventPerQueueTopologyStrategy>();
+        services.TryAddSingleton<ITopologyStrategy, RmqDomainQueueWithEventRoutingTopologyStrategy>();
         services.TryAddSingleton<IEventSerializer, JsonBasedEventSerializer>();
-        services.AddSingleton<RmqTopologyManager>();
+        services.AddSingleton<IRmqTopologyManager, RmqTopologyManager>();
         services.AddSingleton<ITopologyResolver, TopologyResolver>();
 
         services.TryAddSingleton<IMessageRetryPolicy>(provider =>

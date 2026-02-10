@@ -1,9 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
-namespace DotRabbit.IntegrationTests;
+namespace DotRabbit.IntegrationTests.Tools;
 
 public sealed class EventProcessingCounter
 {

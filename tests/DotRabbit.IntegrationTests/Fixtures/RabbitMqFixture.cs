@@ -1,7 +1,6 @@
-﻿
-using Testcontainers.RabbitMq;
+﻿using Testcontainers.RabbitMq;
 
-namespace DotRabbit.IntegrationTests;
+namespace DotRabbit.IntegrationTests.Fixtures;
 
 public sealed class RabbitMqFixture : IAsyncDisposable
 {

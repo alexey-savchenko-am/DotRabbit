@@ -44,14 +44,15 @@ internal sealed class RmqEventConsumer
         if (_subscriptions.ContainsKey(subscriberDefinition))
             throw new InvalidOperationException($"Listener {subscriberDefinition.Id} already subscribed");
 
-        var queues = await _topologyStrategy
+        var topology = await _topologyStrategy
             .ProvisionTopologyAsync(subscriberDefinition.Domain, events)
             .ConfigureAwait(false);
 
         var connection = await _connectionFactory.GetConnectionAsync(ct).ConfigureAwait(false);
 
         // IConnection is a thread safe, so don't worry about using it like shown below :)
-        var subscriptionTasks = queues
+        var subscriptionTasks = topology
+            .Queues
             .Where(q => q.IsLiveDefinition)
             .Select(q => ConsumeQueueAsync(connection, subscriberDefinition.Domain, q, ct));
 

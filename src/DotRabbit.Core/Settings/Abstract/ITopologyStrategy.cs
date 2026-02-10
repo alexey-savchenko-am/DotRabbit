@@ -4,7 +4,7 @@ namespace DotRabbit.Core.Settings.Abstract;
 
 internal interface ITopologyStrategy
 {
-    Task<IReadOnlyList<QueueDefinition>> ProvisionTopologyAsync(
+    Task<TopologyDefinition> ProvisionTopologyAsync(
         DomainDefinition domain,
         IReadOnlyCollection<EventDefinition> events);
 }
