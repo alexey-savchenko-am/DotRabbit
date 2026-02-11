@@ -1,4 +1,4 @@
-﻿using DotRabbit.Abstractions;
+﻿using DotRabbit.Core.Connection;
 using DotRabbit.Core.Eventing.Abstract;
 using DotRabbit.Core.Eventing.DomainEventGroup;
 using DotRabbit.Core.Eventing.Entities;

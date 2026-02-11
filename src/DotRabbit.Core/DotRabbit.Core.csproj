@@ -8,9 +8,12 @@
 		<Title>1</Title>
 		<Authors>Alexey Savchenko</Authors>
 		<Product>DotRabbit</Product>
-		<Description>DotRabbit</Description>
+		<Description>DotRabbit is a fast, event-driven RabbitMQ client for .NET. It is designed to be simple to use, easy to configure, and efficient under load. DotRabbit focuses on a clean developer experience while keeping message publishing and consumption lightweight and predictable.</Description>
 		<PackageProjectUrl>https://github.com/alexey-savchenko-am/DotRabbit</PackageProjectUrl>
-		<PackageIcon>logo.png</PackageIcon>
+		<PackageIcon>logo-lg.png</PackageIcon>
+		<Copyright>Alexey Savchenko</Copyright>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/alexey-savchenko-am/DotRabbit</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -21,17 +24,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\DotRabbit.Abstractions\DotRabbit.Abstractions.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
 			<_Parameter1>DotRabbit.UnitTests</_Parameter1>
 		</AssemblyAttribute>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="..\..\docs\assets\logo.png">
+	  <None Include="..\..\docs\assets\logo-lg.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\..\README.md">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>

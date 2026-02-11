@@ -1,6 +1,6 @@
 ﻿using RabbitMQ.Client;
 
-namespace DotRabbit.Abstractions;
+namespace DotRabbit.Core.Connection;
 
 public interface IRmqConnectionFactory
 {

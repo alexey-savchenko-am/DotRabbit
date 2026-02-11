@@ -1,5 +1,4 @@
-﻿using DotRabbit.Abstractions;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using System.Collections.Concurrent;
 
 namespace DotRabbit.Core.Connection;
