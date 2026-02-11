@@ -19,7 +19,8 @@ DotRabbit focuses on a clean developer experience while keeping message publishi
     - [Event Subscriber Registration](#event-subscriber-registration)
     - [Event Publishing](#event-publishing)
 - [Architecture](#architecture)
-
+- [Topology](#topology)
+  
 ## Installation
 Install NuGet package via NuGet.org
 
@@ -112,7 +113,61 @@ services.AddEventSubscriber(
 ## Architecture
 
 <div align="center">
-  <img src="docs/assets/architecture.jpg#gh-light-mode-only" alt="Architecture diagram"  width="60%">
-  <img src="docs/assets/architecture-dark.png#gh-dark-mode-only" alt="Architecture diagram"  width="60%">
+  <img src="docs/assets/architecture.jpg#gh-light-mode-only" alt="Architecture diagram" >
+  <img src="docs/assets/architecture-dark.png#gh-dark-mode-only" alt="Architecture diagram"  >
 </div>
 
+## Topology
+
+- One queue per domain per service
+- Routing-key = event name
+- Retry is implemented via TTL + Dead Letter Exchange
+- Routing-key is preserved automatically (no DeadLetterRoutingKey)
+- Retry count is tracked in message headers by consumer
+- Messages exceeding retry limit are published to DLQ explicitly
+
+```
+                         ┌──────────────────────────┐
+                         │       users.topic        │
+                         │          (topic)         │
+                         └─────────────┬────────────┘
+                                       │
+          ┌────────────────────────────┼────────────────────────────┐
+          │                            │                            │
+   rk = user-created            rk = user-updated            rk = user-deleted
+          │                            │                            │
+          ▼                            ▼                            ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                           <service>.users.q                            │
+│                     (domain queue per service)                         │
+└────────────────────────────────────────────────────────────────────────┘
+
+
+                         ┌──────────────────────────┐
+                         │         users.retry      │
+                         │         (direct)         │
+                         └─────────────┬────────────┘
+                                       │
+          ┌────────────────────────────┼────────────────────────────┐
+          │                            │                            │
+   rk = user-created            rk = user-updated            rk = user-deleted
+          │                            │                            │
+          ▼                            ▼                            ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                       <service>.users.retry                            │
+│                   (retry queue per service, TTL)                       │
+└────────────────────────────────────────────────────────────────────────┘
+
+
+                         ┌──────────────────────────┐
+                         │        users.dlx         │
+                         │        (fanout)          │
+                         └─────────────┬────────────┘
+                                       │
+                                       ▼
+                         ┌──────────────────────────┐
+                         │   <service>.users.dlq    │
+                         │        (DLQ)             │
+                         └──────────────────────────┘
+
+```
