@@ -24,6 +24,9 @@ jobs:
       - name: Build projects
         run: dotnet build --configuration Release --no-restore
 
+      - name: Run unit tests
+        run: dotnet test tests/DotRabbit.UnitTests/DotRabbit.UnitTests.csproj --configuration Release --no-build
+
       - name: Pack NuGet packages
         run: dotnet pack --configuration Release --no-build --output ./nupkg
 
