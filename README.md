@@ -8,7 +8,7 @@
 
 **DotRabbit** is a fast, event-driven RabbitMQ client for .NET. 
 It is designed to be simple to use, easy to configure, and efficient under load. 
-DotRabbit focuses on a clean developer experience while keeping message publishing and consumption lightweight and predictable
+DotRabbit focuses on a clean developer experience while keeping message publishing and consumption lightweight and predictable.
 
 ## Table of contents
 - [Installation](#installation)
@@ -108,6 +108,27 @@ services.AddEventSubscriber(
             .SubscribeOn<UserCreatedEvent, UserCreatedEventHandler>()
             .SubscribeOn<UserUpdatedEvent, UserUpdatedEventHandler>()
 );
+```
+
+### Event Publishing
+Use `IEventPublisher` to publish events to the Bus.
+
+```csharp
+using DotRabbit.Core.Eventing.Abstract;
+
+IEventPublisher _publisher;
+
+await _publisher.PublishAsync(
+  new DomainDefinition("users"),
+  new UserCreatedEvent()
+);
+
+```
+
+You can omit the domain when there are no event type collisions between domains.
+
+```csharp
+await _publisher.PublishAsync(new UserCreatedEvent());
 ```
 
 ## Architecture
