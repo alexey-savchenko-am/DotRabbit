@@ -146,7 +146,6 @@ await _publisher.PublishAsync(new UserCreatedEvent());
 - Routing-key is preserved automatically (no DeadLetterRoutingKey)
 - Retry count is tracked in message headers by consumer
 - Messages exceeding retry limit are published to DLQ explicitly
-
 ```
                          ┌──────────────────────────┐
                          │       users.topic        │
